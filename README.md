@@ -32,7 +32,7 @@ With no keys at all, the rule-based checks still run. Add keys one at a time:
 
 ### Supabase setup
 
-Open your project → **SQL Editor** → paste `supabase/migrations/0001_init.sql` → **Run**.
+Open your project → **SQL Editor** → paste all of `supabase/setup.sql` → **Run**. (It's the two migrations in `supabase/migrations/` combined, and safe to run twice.)
 It creates `checks`, `payments`, `reports`, `ledger`, the `append_ledger()` function and turns on row-level security.
 
 ### PayPal sandbox test

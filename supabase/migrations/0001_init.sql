@@ -53,7 +53,9 @@ create table if not exists public.ledger (
 
 -- Append-only: block updates and deletes at the database level.
 create or replace function public.ledger_block_changes() returns trigger
-language plpgsql as $$
+language plpgsql
+set search_path = public
+as $$
 begin
   raise exception 'ledger is append-only';
 end $$;
