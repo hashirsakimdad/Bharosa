@@ -1,0 +1,8 @@
+{
+  "name": "Obvious scam: cheap iPhone, crypto only, urgent",
+  "short": "Fake iPhone deal",
+  "expected": ["danger"],
+  "input": {
+    "text": "Hi dear! iPhone 15 Pro Max 256GB brand new box packed, only $280 today. Order from our official site apple-store-pk.shop or pay here. Payment only in USDT (TRC20) to wallet TQn9Y2khEsLJW1ChVWFMSMeRDow5KcbLSE, no COD no PayPal. Hurry, 5 people are waiting, offer ends tonight!"
+  }
+}

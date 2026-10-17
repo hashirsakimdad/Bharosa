@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: #faf7f2;
+  color: #1c1917;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Urdu reads better in Nastaliq when the device has it */
+.urdu {
+  font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Noto Sans Arabic", serif;
+  line-height: 2.1;
+}
+
+@keyframes verdict-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.verdict-in {
+  animation: verdict-in 280ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verdict-in {
+    animation: none;
+  }
+}

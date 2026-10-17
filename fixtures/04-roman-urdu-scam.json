@@ -1,0 +1,8 @@
+{
+  "name": "Roman Urdu scam: too cheap, JazzCash advance, pressure",
+  "short": "Roman Urdu seller",
+  "expected": ["danger", "careful"],
+  "input": {
+    "text": "Bhai PS5 bilkul new hai, sirf 45k mein de raha hoon. Pehle 10000 advance JazzCash pe bhejo 03001234567 pe, phir parcel bhej dunga. COD nahi hai. Jaldi karo bhai, aaj hi confirm karo warna kisi aur ko de doon ga. Page ka link: instagram.com/ps5_official_store_pk"
+  }
+}

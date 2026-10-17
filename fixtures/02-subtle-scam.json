@@ -1,0 +1,8 @@
+{
+  "name": "Subtle scam: advance payment, bank transfer only, pressure",
+  "short": "Laptop with advance",
+  "expected": ["careful", "danger"],
+  "input": {
+    "text": "Assalam o alaikum. Dell XPS 13 (2024), 16GB/512GB, used 3 months, Rs 210,000. Details at dellxps-deals.store. To book it send 50% advance by bank transfer to my account (IBAN PK36MEZN0001230100456789), remaining on delivery. 2 more people are asking, please confirm today."
+  }
+}

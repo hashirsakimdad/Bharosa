@@ -1,0 +1,8 @@
+{
+  "name": "Safe seller: normal price, PayPal or cash on delivery",
+  "short": "Normal headphones sale",
+  "expected": ["safe"],
+  "input": {
+    "text": "Hello! Yes the Sony WH-1000XM5 headphones are available, brand new sealed, $329. You can pay with PayPal or cash on delivery, whatever you prefer. Delivery takes 2-3 days. Let me know if you have any questions."
+  }
+}
