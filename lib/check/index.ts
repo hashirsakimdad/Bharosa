@@ -50,8 +50,8 @@ export async function runCheck(input: CheckInput, lookups: Lookups = defaultLook
   const result: CheckResult = { id, verdict, color, reason, language: lang, signals, extracted, record: null, notes };
 
   // 6. Save + chain it (non-blocking for the verdict: failures become notes)
-  const inputType = images.length ? "image" : input.url && !input.text ? "link" : "text";
-  const saveError = await saveCheck(result, inputType);
+  const inputType = input.inputType ?? (images.length ? "image" : input.url && !input.text ? "link" : "text");
+  const saveError = await saveCheck(result, inputType, input.channel ?? "web");
   if (saveError) notes.push(saveError);
   else result.record = await appendLedger("check", id, checkPayload(result));
 

@@ -16,18 +16,26 @@ export function db(): SupabaseClient | null {
   return client;
 }
 
-export async function saveCheck(result: CheckResult, inputType: string): Promise<string | null> {
+export async function saveCheck(result: CheckResult, inputType: string, channel = "web"): Promise<string | null> {
   const supabase = db();
   if (!supabase) return null;
-  const { error } = await supabase.from("checks").insert({
+  const row = {
     id: result.id,
     input_type: inputType,
+    channel,
     extracted: result.extracted,
     signals: result.signals,
     verdict: result.verdict,
     reason: result.reason,
     language: result.language,
-  });
+  };
+  let { error } = await supabase.from("checks").insert(row);
+  if (error && /channel/.test(error.message)) {
+    // 0002_whatsapp.sql not applied yet: save without the new column rather than lose the check
+    const { channel: _omit, ...legacy } = row;
+    void _omit;
+    ({ error } = await supabase.from("checks").insert({ ...legacy, input_type: inputType === "voice" ? "text" : inputType }));
+  }
   return error ? `Could not save check: ${error.message}` : null;
 }
 
@@ -96,9 +104,39 @@ export async function saveReport(rows: ReportRow[]): Promise<{ inserted: ReportR
   return { inserted: (data ?? []) as ReportRow[], error: error ? error.message : null };
 }
 
-export async function getCheck(id: string): Promise<{ id: string; extracted: unknown; verdict: string } | null> {
+export interface StoredCheck {
+  id: string;
+  extracted: unknown;
+  signals: unknown;
+  verdict: string;
+  reason: string;
+  language: string;
+}
+
+export async function getCheck(id: string): Promise<StoredCheck | null> {
   const supabase = db();
   if (!supabase) return null;
-  const { data } = await supabase.from("checks").select("id, extracted, verdict").eq("id", id).maybeSingle();
-  return data as { id: string; extracted: unknown; verdict: string } | null;
+  const { data } = await supabase
+    .from("checks")
+    .select("id, extracted, signals, verdict, reason, language")
+    .eq("id", id)
+    .maybeSingle();
+  return data as StoredCheck | null;
+}
+
+// ---------- WhatsApp sessions: the last check per sender, so "WHY" and "REPORT" work ----------
+
+export async function setLastCheck(senderFp: string, checkId: string): Promise<void> {
+  const supabase = db();
+  if (!supabase) return;
+  await supabase
+    .from("wa_sessions")
+    .upsert({ sender_fp: senderFp, last_check_id: checkId, updated_at: new Date().toISOString() });
+}
+
+export async function getLastCheckId(senderFp: string): Promise<string | null> {
+  const supabase = db();
+  if (!supabase) return null;
+  const { data } = await supabase.from("wa_sessions").select("last_check_id").eq("sender_fp", senderFp).maybeSingle();
+  return (data as { last_check_id?: string } | null)?.last_check_id ?? null;
 }

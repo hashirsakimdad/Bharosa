@@ -9,6 +9,7 @@ Built for the PayPal AI Hackathon 2026.
 - "Pay safely with PayPal" link for green/yellow. A red verdict can never create a pay link
 - Community scam reports, stored as salted fingerprints (never raw numbers)
 - Tamper-evident hash chain: every check, report and payment is chained, and anyone can verify it
+- Works on WhatsApp too: forward a message, screenshot or voice note, get the verdict in the same chat
 - Works with zero API keys (rules-only mode), so the demo never fully breaks
 
 ## Quick start
@@ -42,10 +43,46 @@ It creates `checks`, `payments`, `reports`, `ledger`, the `append_ledger()` func
 
 PayPal doesn't take PKR, AED, SAR or INR, so those prices are converted to USD using `FX_TO_USD` (approximate demo rates, update before demo day).
 
+### WhatsApp (Twilio sandbox, free)
+
+People forward a seller's message, screenshot or voice note to a WhatsApp number and get the verdict back in the same chat, in their language.
+
+1. Run `supabase/migrations/0002_whatsapp.sql` in the Supabase SQL Editor.
+2. Create a free Twilio account → **Messaging → Try it out → Send a WhatsApp message**. Join the sandbox from your phone by sending the `join <word>` code it shows to **+1 415 523 8886**.
+3. Put `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` (Console home page) in `.env.local`.
+4. Give Twilio a public URL:
+   - **Deployed:** `https://your-app.vercel.app/api/whatsapp`
+   - **Local:** `npx ngrok http 3000` → `https://<id>.ngrok-free.app/api/whatsapp`
+5. Paste that URL into the sandbox settings, **When a message comes in**, method **POST**. Put the same URL in `TWILIO_WEBHOOK_URL`, restart `npm run dev`.
+6. Send the bot a message from your phone.
+
+What it understands:
+
+| Send | Bharosa replies |
+|---|---|
+| Seller's text or a link | 🔴/🟡/🟢 verdict, reason, warning signs, PayPal pay link if safe |
+| Chat screenshot | Same, read by the AI |
+| Voice note (Urdu, English, Arabic) | Shows what it heard, then the verdict |
+| `WHY` / `kyun` | Every check with its evidence |
+| `REPORT` | Reports the last seller to the community network |
+| `hi` / `salam` / `help` | How to use it |
+
+Replies come in English, Urdu, Roman Urdu or Arabic, matching the sender. Twilio waits only 15 seconds for a reply, so if a check is slow Bharosa answers "checking..." and sends the verdict as a follow-up message.
+
+**Test without a phone:** with `npm run dev` running and any `TWILIO_AUTH_TOKEN` set,
+
+```bash
+npm run wa -- "Bhai PS5 sirf 45k, pehle advance JazzCash pe bhejo, COD nahi hai"
+npm run wa -- WHY
+npm run wa -- REPORT
+```
+
+The simulator signs its requests exactly like Twilio, so it exercises the real security check.
+
 ## Tests
 
 ```bash
-npm run test:rules      # 19 offline tests: rules, verdicts, hash chain, privacy, SSRF. No keys, no network.
+npm test                # 32 offline tests: rules, verdicts, hash chain, privacy, SSRF, WhatsApp. No keys, no network.
 npm run dev             # then in a second terminal:
 npm run test:fixtures   # runs the 4 demo cases through the real API and prints verdicts
 ```
@@ -74,7 +111,7 @@ input (text / link / screenshot)
 | Pressure | | "only today", "5 people waiting", "jaldi karo" |
 | Account age | | seller account <30 days old |
 
-All rules live in `lib/check/`. The WhatsApp channel (phase 2) will call the same `runCheck()`.
+All rules live in `lib/check/`. The web page and WhatsApp (`lib/channels/whatsapp/`) both call the same `runCheck()`.
 
 ## Security
 
@@ -85,10 +122,11 @@ All rules live in `lib/check/`. The WhatsApp channel (phase 2) will call the sam
 - **Rate limits:** 10 checks/minute per IP (in-memory; move to Redis or a table for multi-instance production).
 - **Row-level security** on all tables with no public policies. Only the server's service role key can read or write.
 - Input size limits and schema validation on every endpoint.
+- **WhatsApp webhook:** every request must carry a valid Twilio signature (HMAC-SHA1, constant-time compare) or it gets 403. Media is only downloaded from `api.twilio.com`. Duplicate deliveries are ignored, each sender is rate-limited (6 checks/minute, 5 reports/hour), and sender numbers are stored only as fingerprints.
 
 Known limitations: the DNS check in the image fetcher has a small DNS-rebinding window; the in-memory rate limiter resets on redeploy; market prices are AI estimates and marked as such in the UI.
 
 ## Roadmap
 
-- **Phase 2:** WhatsApp via Twilio sandbox, voice notes, reply in the user's language
+- ~~**Phase 2:** WhatsApp via Twilio sandbox, voice notes, reply in the user's language~~ done
 - **Phase 3:** publish the hash chain's head on a public testnet so the history can't be rewritten even by us, PayPal webhook signature verification, judge-facing demo page

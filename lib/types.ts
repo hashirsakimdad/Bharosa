@@ -84,6 +84,10 @@ export interface CheckInput {
   imageUrl?: string;
   imageBase64?: string;
   language?: Lang;
+  /** Where the input came from, for history. Defaults from the fields above. */
+  inputType?: "text" | "link" | "image" | "voice";
+  /** Messaging channel, for history */
+  channel?: "web" | "whatsapp";
 }
 
 export interface PayInfo {

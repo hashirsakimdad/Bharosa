@@ -22,7 +22,7 @@ const PREFIX: Record<Lang, Record<Verdict, string>> = {
   ar: { danger: "لا ترسل المال.", careful: "كن حذرًا.", safe: "يبدو آمنًا." },
 };
 
-const PHRASES: Record<ReasonCode, Record<Lang, string>> = {
+export const PHRASES: Record<ReasonCode, Record<Lang, string>> = {
   price_far_below: { en: "the price is far below the normal price", ur: "قیمت بازار سے بہت کم ہے", roman_ur: "price market se bohat kam hai", ar: "السعر أقل بكثير من سعر السوق" },
   price_below: { en: "the price is much lower than usual", ur: "قیمت عام سے کافی کم ہے", roman_ur: "price aam se kaafi kam hai", ar: "السعر أقل من المعتاد بكثير" },
   risky_payment: { en: "they want crypto or gift cards, which can't be refunded", ur: "یہ کرپٹو یا گفٹ کارڈ میں پیسے مانگ رہا ہے جو واپس نہیں ہو سکتے", roman_ur: "ye crypto ya gift card mein paise maang raha hai jo wapis nahi hote", ar: "يطلب الدفع بالعملات الرقمية أو بطاقات الهدايا ولا يمكن استردادها" },
@@ -44,22 +44,23 @@ const PHRASES: Record<ReasonCode, Record<Lang, string>> = {
   all_clear: { en: "we found no warning signs, and paying through PayPal keeps you protected", ur: "کوئی خطرے کی علامت نہیں ملی، پے پال سے ادائیگی آپ کو محفوظ رکھتی ہے", roman_ur: "koi khatre ki nishani nahi mili, PayPal se payment aap ko protected rakhti hai", ar: "لم نجد علامات خطر، والدفع عبر PayPal يحميك" },
 };
 
+const END: Record<Lang, string> = { en: ".", ur: "۔", roman_ur: ".", ar: "." };
 const AND: Record<Lang, string> = { en: " and ", ur: " اور ", roman_ur: " aur ", ar: " و" };
 const BUT_NOTE: Record<Lang, string> = { en: "One thing to note: ", ur: "البتہ ", roman_ur: "Bas ye dhyan rakhein: ", ar: "لكن انتبه: " };
 
 export function templateReason(verdict: Verdict, signals: Signal[], lang: Lang, enoughInfo: boolean): string {
   const prefix = PREFIX[lang][verdict];
-  if (!enoughInfo) return `${prefix} ${cap(PHRASES.not_enough_info[lang], lang)}.`;
+  if (!enoughInfo) return `${prefix} ${cap(PHRASES.not_enough_info[lang], lang)}${END[lang]}`;
 
   let flagged = rankSignals(signals).filter((s) => (s.result === "danger" || s.result === "warn") && s.code);
   // a wallet address already says "crypto"; don't repeat it
   if (flagged.some((s) => s.code === "crypto_wallet")) flagged = flagged.filter((s) => s.code !== "risky_payment");
   if (verdict === "safe") {
-    if (flagged.length) return `${prefix} ${BUT_NOTE[lang]}${PHRASES[flagged[0].code!][lang]}.`;
-    return `${prefix} ${cap(PHRASES.all_clear[lang], lang)}.`;
+    if (flagged.length) return `${prefix} ${BUT_NOTE[lang]}${PHRASES[flagged[0].code!][lang]}${END[lang]}`;
+    return `${prefix} ${cap(PHRASES.all_clear[lang], lang)}${END[lang]}`;
   }
   const top = flagged.slice(0, 2).map((s) => PHRASES[s.code!][lang]);
-  return `${prefix} ${cap(top.join(AND[lang]), lang)}.`;
+  return `${prefix} ${cap(top.join(AND[lang]), lang)}${END[lang]}`;
 }
 
 export async function explain(
