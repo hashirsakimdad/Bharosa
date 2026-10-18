@@ -31,6 +31,7 @@ const LlmSchema = z.object({
   links: strArr,
   phone_numbers: strArr,
   wallet_addresses: strArr,
+  seller_paypal_email: str,
   urgency_phrases: strArr,
   language: z.enum(["en", "ur", "roman_ur", "ar"]).catch("en"),
   visible_text: z.string().catch(""),
@@ -57,6 +58,7 @@ Return JSON with exactly these keys:
   "links": string[],
   "phone_numbers": string[],
   "wallet_addresses": string[],            // crypto wallet addresses, copied exactly
+  "seller_paypal_email": string|null,      // the email the seller says to send PayPal payments to, if any
   "urgency_phrases": string[],             // exact pressure phrases: "only today", "3 people waiting", "jaldi confirm karo"
   "language": "en"|"ur"|"roman_ur"|"ar",   // language the SELLER/USER wrote in. roman_ur = Urdu typed in English letters
   "visible_text": string                   // for screenshots: the chat text you can read, max 1500 chars. For text input: ""
@@ -134,6 +136,7 @@ export async function extract(params: {
       .filter((p) => p.replace("+", "").length >= 10)
       .slice(0, 5),
     walletAddresses: [...wallets].slice(0, 5),
+    sellerPaypalEmail: validEmail(parsed.seller_paypal_email) ?? heuristic.sellerPaypalEmail ?? fromImage?.sellerPaypalEmail ?? null,
     urgencyPhrases: uniq([...parsed.urgency_phrases, ...heuristic.urgencyPhrases, ...(fromImage?.urgencyPhrases ?? [])]).slice(0, 6),
     language: params.language ?? pickLanguage(params.text, parsed.language),
     source: "llm",
@@ -145,6 +148,12 @@ export async function extract(params: {
 function pickLanguage(text: string, aiLang: Lang): Lang {
   const rule = text.trim() ? detectLanguage(text) : "en";
   return rule !== "en" ? rule : aiLang;
+}
+
+function validEmail(s: string | null): string | null {
+  if (!s) return null;
+  const t = s.trim().toLowerCase();
+  return /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(t) ? t : null;
 }
 
 function uniq(arr: string[]): string[] {

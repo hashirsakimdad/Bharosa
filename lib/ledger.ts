@@ -15,7 +15,13 @@ import type { LedgerRecord } from "./types";
  * requests can never create a fork.
  */
 
-export type LedgerKind = "check" | "report" | "payment_created" | "payment_captured";
+export type LedgerKind =
+  | "check"
+  | "report"
+  | "payment_created"
+  | "payment_captured"
+  | "payment_refunded"
+  | "payment_disputed";
 
 export const GENESIS = "0".repeat(64);
 

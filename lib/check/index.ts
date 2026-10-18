@@ -64,12 +64,20 @@ export async function runCheck(input: CheckInput, lookups: Lookups = defaultLook
       if (!amount) {
         notes.push(`Can't pay in ${extracted.currency ?? "this currency"} yet. Add a rate to FX_TO_USD.`);
       } else {
-        const order = await createOrder({
+        const base = {
           value: amount.value,
           currency: amount.currency,
           description: extracted.product ? `Bharosa safe pay: ${extracted.product}` : "Bharosa safe pay",
           checkId: id,
-        });
+        };
+        // Pay the seller directly when they gave a PayPal email; if PayPal rejects it, fall back.
+        let payee = extracted.sellerPaypalEmail ?? undefined;
+        let order = await createOrder({ ...base, payeeEmail: payee });
+        if (!order.ok && payee) {
+          notes.push(`PayPal couldn't pay ${payee} directly (${order.error}), so the payment goes through Bharosa.`);
+          payee = undefined;
+          order = await createOrder(base);
+        }
         if (order.ok) {
           result.payLink = order.data.approveUrl;
           result.pay = {
@@ -78,8 +86,9 @@ export async function runCheck(input: CheckInput, lookups: Lookups = defaultLook
             amount: amount.value,
             currency: amount.currency,
             convertedFrom: amount.convertedFrom,
+            payee,
           };
-          await savePayment({ checkId: id, orderId: order.data.orderId, amount: amount.value, currency: amount.currency, status: "CREATED" });
+          await savePayment({ checkId: id, orderId: order.data.orderId, amount: amount.value, currency: amount.currency, status: "CREATED", payeeEmail: payee });
           await appendLedger("payment_created", id, { orderId: order.data.orderId, amount: amount.value, currency: amount.currency });
         } else {
           notes.push(order.error);

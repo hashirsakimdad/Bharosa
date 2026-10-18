@@ -107,11 +107,13 @@ export async function createOrder(params: {
   currency: string;
   description: string;
   checkId: string;
+  /** Seller's PayPal email. When set, the money goes straight to the seller. */
+  payeeEmail?: string;
 }): Promise<Result<{ orderId: string; approveUrl: string }>> {
   const appUrl = process.env.APP_URL || "http://localhost:3000";
   const order = await paypalFetch<PayPalOrder>("/v2/checkout/orders", {
     method: "POST",
-    headers: { "PayPal-Request-Id": `bharosa-${params.checkId}` },
+    headers: { "PayPal-Request-Id": `bharosa-${params.checkId}${params.payeeEmail ? "-p" : ""}` },
     body: JSON.stringify({
       intent: "CAPTURE",
       purchase_units: [
@@ -119,6 +121,7 @@ export async function createOrder(params: {
           reference_id: params.checkId,
           description: params.description.slice(0, 127),
           amount: { currency_code: params.currency, value: params.value },
+          ...(params.payeeEmail ? { payee: { email_address: params.payeeEmail } } : {}),
         },
       ],
       payment_source: {
@@ -145,4 +148,72 @@ export async function captureOrder(orderId: string): Promise<Result<PayPalOrder>
     method: "POST",
     body: "{}",
   });
+}
+
+/** The capture id inside a captured order (refunds and disputes refer to it). */
+export function captureIdOf(order: unknown): string | null {
+  const o = order as { purchase_units?: Array<{ payments?: { captures?: Array<{ id?: string }> } }> };
+  return o.purchase_units?.[0]?.payments?.captures?.[0]?.id ?? null;
+}
+
+// ---------- webhooks ----------
+
+export interface WebhookHeaders {
+  authAlgo: string | null;
+  certUrl: string | null;
+  transmissionId: string | null;
+  transmissionSig: string | null;
+  transmissionTime: string | null;
+}
+
+export function webhookHeaders(h: Headers): WebhookHeaders {
+  return {
+    authAlgo: h.get("paypal-auth-algo"),
+    certUrl: h.get("paypal-cert-url"),
+    transmissionId: h.get("paypal-transmission-id"),
+    transmissionSig: h.get("paypal-transmission-sig"),
+    transmissionTime: h.get("paypal-transmission-time"),
+  };
+}
+
+/**
+ * Builds the body for PayPal's verify-webhook-signature call.
+ * The event goes in exactly as received (raw text): re-serializing it can change
+ * number formats or key order and make a genuine event fail verification.
+ */
+export function buildVerifyBody(h: WebhookHeaders, webhookId: string, rawEvent: string): string {
+  const head = JSON.stringify({
+    auth_algo: h.authAlgo,
+    cert_url: h.certUrl,
+    transmission_id: h.transmissionId,
+    transmission_sig: h.transmissionSig,
+    transmission_time: h.transmissionTime,
+    webhook_id: webhookId,
+  });
+  return `${head.slice(0, -1)},"webhook_event":${rawEvent.trim()}}`;
+}
+
+/**
+ * Asks PayPal whether a webhook really came from PayPal.
+ * https://developer.paypal.com/docs/api/webhooks/v1/#verify-webhook-signature_post
+ */
+export async function verifyWebhook(h: WebhookHeaders, rawEvent: string): Promise<Result<boolean>> {
+  const webhookId = process.env.PAYPAL_WEBHOOK_ID;
+  if (!webhookId) return { ok: false, error: "PAYPAL_WEBHOOK_ID is not set" };
+  if (!h.authAlgo || !h.certUrl || !h.transmissionId || !h.transmissionSig || !h.transmissionTime) {
+    return { ok: true, data: false };
+  }
+  // PayPal's certificates only ever come from PayPal hosts.
+  try {
+    const host = new URL(h.certUrl).hostname;
+    if (!/(^|\.)paypal\.com$/.test(host)) return { ok: true, data: false };
+  } catch {
+    return { ok: true, data: false };
+  }
+  const res = await paypalFetch<{ verification_status?: string }>("/v1/notifications/verify-webhook-signature", {
+    method: "POST",
+    body: buildVerifyBody(h, webhookId, rawEvent),
+  });
+  if (!res.ok) return res;
+  return { ok: true, data: res.data.verification_status === "SUCCESS" };
 }

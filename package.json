@@ -11,8 +11,9 @@
     "test:rules": "node --import tsx --test scripts/test-rules.ts",
     "test:fixtures": "tsx scripts/test-fixtures.ts",
     "test:whatsapp": "node --import tsx --test scripts/test-whatsapp.ts",
-    "test": "node --import tsx --test scripts/test-rules.ts scripts/test-whatsapp.ts",
-    "wa": "tsx scripts/simulate-whatsapp.ts"
+    "test": "node --import tsx --test scripts/test-rules.ts scripts/test-whatsapp.ts scripts/test-trust.ts",
+    "wa": "tsx scripts/simulate-whatsapp.ts",
+    "test:trust": "node --import tsx --test scripts/test-trust.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

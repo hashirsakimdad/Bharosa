@@ -152,6 +152,20 @@ export function extractWalletAddresses(text: string): string[] {
   return [...out].slice(0, 5);
 }
 
+/**
+ * The seller's PayPal email: an email written next to the word PayPal
+ * ("PayPal: ali@gmail.com", "send on paypal to ali@gmail.com").
+ */
+export function extractPaypalEmail(text: string): string | null {
+  const email = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi;
+  for (const m of text.matchAll(email)) {
+    const i = m.index ?? 0;
+    const around = text.slice(Math.max(0, i - 40), i + m[0].length + 20).toLowerCase();
+    if (around.includes("paypal")) return m[0].toLowerCase();
+  }
+  return null;
+}
+
 export function extractHandle(text: string): string | null {
   const m = /(?:^|\s)@([a-z0-9._]{3,30})/i.exec(text);
   return m ? `@${m[1]}` : null;
@@ -200,6 +214,7 @@ export function heuristicExtract(text: string, language?: Lang): Extracted {
     links: extractLinks(text),
     phones: extractPhones(text),
     walletAddresses: wallets,
+    sellerPaypalEmail: extractPaypalEmail(text),
     urgencyPhrases: extractUrgency(text),
     language: language ?? detectLanguage(text),
     source: "heuristic",

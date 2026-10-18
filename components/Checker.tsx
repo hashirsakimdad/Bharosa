@@ -212,6 +212,9 @@ export default function Checker() {
               Pay {result.pay.currency} {result.pay.amount} safely with PayPal
             </a>
           )}
+          {result.pay?.payee && (
+            <p className="mt-2 text-center text-sm text-stone-600">Goes straight to the seller&apos;s PayPal: {result.pay.payee}</p>
+          )}
           {result.pay?.convertedFrom && (
             <p className="mt-2 text-center text-sm text-stone-600">
               Converted from {result.pay.convertedFrom.currency} {result.pay.convertedFrom.amount.toLocaleString()} (approx. rate)
@@ -259,8 +262,8 @@ export default function Checker() {
           {result.record && (
             <p className="mt-4 text-xs text-stone-600">
               Tamper-proof record #{result.record.seq} · {result.record.entryHash.slice(0, 10)}…{result.record.entryHash.slice(-6)} ·{" "}
-              <a href="/api/ledger/verify" target="_blank" rel="noreferrer" className="underline">
-                verify chain
+              <a href="/proof" className="underline">
+                verify
               </a>
             </p>
           )}
@@ -276,6 +279,10 @@ export default function Checker() {
 
       <footer className="mt-10 text-center text-sm text-stone-500">
         We never decide with AI alone: fixed rules pick the color, AI only reads and explains.
+        <br />
+        <a href="/proof" className="underline">
+          Every check is chained and stamped on Bitcoin. See the proof.
+        </a>
       </footer>
     </main>
   );

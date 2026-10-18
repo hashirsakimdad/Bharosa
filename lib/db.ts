@@ -45,28 +45,109 @@ export async function savePayment(p: {
   amount: string;
   currency: string;
   status: string;
+  payeeEmail?: string;
 }): Promise<void> {
   const supabase = db();
   if (!supabase) return;
-  await supabase.from("payments").insert({
+  const row = {
     check_id: p.checkId,
     paypal_order_id: p.orderId,
     amount: p.amount,
     currency: p.currency,
     status: p.status,
-  });
+    payee_email: p.payeeEmail ?? null,
+  };
+  const { error } = await supabase.from("payments").insert(row);
+  if (error && /payee_email/.test(error.message)) {
+    // 0003_trust.sql not applied yet
+    const { payee_email: _omit, ...legacy } = row;
+    void _omit;
+    await supabase.from("payments").insert(legacy);
+  }
 }
 
-export async function updatePaymentStatus(orderId: string, status: string): Promise<string | null> {
+export interface PaymentRow {
+  check_id: string | null;
+  paypal_order_id: string;
+  capture_id: string | null;
+  status: string;
+}
+
+/**
+ * Moves a payment to a new status, only if it isn't already there.
+ * Returns the payment when it changed, null when nothing changed (or no DB).
+ * PayPal sends the same event to the return URL and the webhook, and can retry
+ * webhooks, so this is what keeps the ledger free of duplicate entries.
+ */
+export async function transitionPayment(
+  match: { orderId?: string; captureId?: string },
+  status: string,
+  captureId?: string | null,
+): Promise<PaymentRow | null> {
+  const supabase = db();
+  if (!supabase || (!match.orderId && !match.captureId)) return null;
+  let q = supabase
+    .from("payments")
+    .update({ status, ...(captureId ? { capture_id: captureId } : {}) })
+    .neq("status", status);
+  q = match.orderId ? q.eq("paypal_order_id", match.orderId) : q.eq("capture_id", match.captureId!);
+  const { data, error } = await q.select("check_id, paypal_order_id, capture_id, status").maybeSingle();
+  if (error && /capture_id/.test(error.message) && match.orderId) {
+    // 0003 not applied yet: update status only
+    const { data: d2 } = await supabase
+      .from("payments")
+      .update({ status })
+      .neq("status", status)
+      .eq("paypal_order_id", match.orderId)
+      .select("check_id, paypal_order_id, status")
+      .maybeSingle();
+    return d2 ? ({ ...(d2 as object), capture_id: null } as PaymentRow) : null;
+  }
+  return (data as PaymentRow | null) ?? null;
+}
+
+// ---------- proof page stats ----------
+
+export interface Stats {
+  checks: number;
+  danger: number;
+  careful: number;
+  safe: number;
+  whatsapp: number;
+  reports: number;
+  paymentsCompleted: number;
+}
+
+export async function getStats(): Promise<Stats | null> {
   const supabase = db();
   if (!supabase) return null;
+  const count = async (table: string, col?: string, val?: string) => {
+    let q = supabase.from(table).select("*", { count: "exact", head: true });
+    if (col && val) q = q.eq(col, val);
+    const { count: n } = await q;
+    return n ?? 0;
+  };
+  const [checks, danger, careful, safe, whatsapp, reports, paymentsCompleted] = await Promise.all([
+    count("checks"),
+    count("checks", "verdict", "danger"),
+    count("checks", "verdict", "careful"),
+    count("checks", "verdict", "safe"),
+    count("checks", "channel", "whatsapp").catch(() => 0),
+    count("reports"),
+    count("payments", "status", "COMPLETED"),
+  ]);
+  return { checks, danger, careful, safe, whatsapp, reports, paymentsCompleted };
+}
+
+export async function recentLedger(limit = 12): Promise<Array<{ seq: number; kind: string; entry_hash: string; created_at: string }>> {
+  const supabase = db();
+  if (!supabase) return [];
   const { data } = await supabase
-    .from("payments")
-    .update({ status })
-    .eq("paypal_order_id", orderId)
-    .select("check_id")
-    .maybeSingle();
-  return (data as { check_id?: string } | null)?.check_id ?? null;
+    .from("ledger")
+    .select("seq, kind, entry_hash, created_at")
+    .order("seq", { ascending: false })
+    .limit(limit);
+  return (data ?? []) as Array<{ seq: number; kind: string; entry_hash: string; created_at: string }>;
 }
 
 // ---------- scam report network ----------

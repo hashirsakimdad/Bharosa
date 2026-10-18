@@ -8,7 +8,7 @@ Built for the PayPal AI Hackathon 2026.
 - Fixed rules pick the color. AI only reads the message and writes the explanation
 - "Pay safely with PayPal" link for green/yellow. A red verdict can never create a pay link
 - Community scam reports, stored as salted fingerprints (never raw numbers)
-- Tamper-evident hash chain: every check, report and payment is chained, and anyone can verify it
+- Tamper-evident hash chain: every check, report and payment is chained, stamped on Bitcoin daily, and anyone can verify it on `/proof`
 - Works on WhatsApp too: forward a message, screenshot or voice note, get the verdict in the same chat
 - Works with zero API keys (rules-only mode), so the demo never fully breaks
 
@@ -79,10 +79,31 @@ npm run wa -- REPORT
 
 The simulator signs its requests exactly like Twilio, so it exercises the real security check.
 
+### PayPal webhooks
+
+Payments, refunds and disputes update automatically, even if the buyer closes the tab before PayPal redirects them back.
+
+1. Deploy (or run ngrok) so you have a public https URL.
+2. developer.paypal.com → your sandbox app → **Webhooks → Add webhook**, URL `https://<your-app>/api/paypal/webhook`.
+3. Tick **PAYMENT.CAPTURE.COMPLETED, PAYMENT.CAPTURE.DENIED, PAYMENT.CAPTURE.REFUNDED, CUSTOMER.DISPUTE.CREATED**.
+4. Copy the **Webhook ID** into `PAYPAL_WEBHOOK_ID`.
+
+Every webhook is checked with PayPal's verify-signature API before anything happens. A dispute on a Bharosa payment also counts as a scam report against that seller.
+
+**Paying the seller directly:** if the seller's message includes their PayPal email ("PayPal: ali@example.com"), the pay link sends the money straight to them, with buyer protection. If PayPal rejects that email (in the sandbox, it must be a sandbox account), the payment falls back to the Bharosa account and the result says so.
+
+### Bitcoin anchoring + Proof page
+
+Once a day, Bharosa stamps the newest hash in its chain on Bitcoin through [OpenTimestamps](https://opentimestamps.org): free, no wallet, no crypto needed. Because every record includes the hash before it, one stamp covers the whole history.
+
+- Set `CRON_SECRET` (any long random string). On Vercel, `vercel.json` runs the stamp daily at midnight Pakistan time.
+- Run it by hand: `curl -X POST -H "Authorization: Bearer $CRON_SECRET" https://<your-app>/api/anchor`
+- **`/proof`** is the public page for judges: chain status, live stats, recent records (hashes only), and each Bitcoin stamp with its file and `.ots` proof. Drop both onto opentimestamps.org to see the Bitcoin block. A fresh stamp takes a few hours to reach a block.
+
 ## Tests
 
 ```bash
-npm test                # 32 offline tests: rules, verdicts, hash chain, privacy, SSRF, WhatsApp. No keys, no network.
+npm test                # 47 offline tests: rules, verdicts, hash chain, privacy, SSRF, WhatsApp, PayPal webhooks, Bitcoin stamps. No keys, no network.
 npm run dev             # then in a second terminal:
 npm run test:fixtures   # runs the 4 demo cases through the real API and prints verdicts
 ```
@@ -122,6 +143,8 @@ All rules live in `lib/check/`. The web page and WhatsApp (`lib/channels/whatsap
 - **Rate limits:** 10 checks/minute per IP (in-memory; move to Redis or a table for multi-instance production).
 - **Row-level security** on all tables with no public policies. Only the server's service role key can read or write.
 - Input size limits and schema validation on every endpoint.
+- **PayPal webhooks:** verified with PayPal's verify-signature API, sending the event exactly as received (re-encoding it can break genuine signatures); certificate URLs must be on paypal.com; repeats are ignored and every handler is idempotent.
+- **Anchoring endpoint** is locked behind `CRON_SECRET` (constant-time compare). A broken chain is never anchored.
 - **WhatsApp webhook:** every request must carry a valid Twilio signature (HMAC-SHA1, constant-time compare) or it gets 403. Media is only downloaded from `api.twilio.com`. Duplicate deliveries are ignored, each sender is rate-limited (6 checks/minute, 5 reports/hour), and sender numbers are stored only as fingerprints.
 
 Known limitations: the DNS check in the image fetcher has a small DNS-rebinding window; the in-memory rate limiter resets on redeploy; market prices are AI estimates and marked as such in the UI.
@@ -129,4 +152,4 @@ Known limitations: the DNS check in the image fetcher has a small DNS-rebinding 
 ## Roadmap
 
 - ~~**Phase 2:** WhatsApp via Twilio sandbox, voice notes, reply in the user's language~~ done
-- **Phase 3:** publish the hash chain's head on a public testnet so the history can't be rewritten even by us, PayPal webhook signature verification, judge-facing demo page
+- ~~**Phase 3:** Bitcoin anchoring, verified PayPal webhooks, paying sellers directly, public Proof page~~ done

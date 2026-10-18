@@ -72,6 +72,8 @@ export interface Extracted {
   phones: string[];
   /** Crypto wallet addresses found in the message (BTC / ETH / TRON) */
   walletAddresses: string[];
+  /** Seller's PayPal email, if they gave one. Payments then go straight to them. */
+  sellerPaypalEmail: string | null;
   urgencyPhrases: string[];
   language: Lang;
   /** Where these facts came from. "heuristic" means the AI was unavailable. */
@@ -97,6 +99,8 @@ export interface PayInfo {
   currency: string;
   /** Set when the price was converted (e.g. PKR -> USD) */
   convertedFrom?: { amount: number; currency: string };
+  /** Seller's PayPal email when the money goes straight to them */
+  payee?: string;
 }
 
 export interface CheckResult {

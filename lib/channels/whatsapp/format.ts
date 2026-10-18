@@ -162,7 +162,9 @@ export function formatResult(r: CheckResult, opts: { heard?: string } = {}): str
     const conv = r.pay.convertedFrom
       ? ` (${t.converted} ${r.pay.convertedFrom.currency} ${r.pay.convertedFrom.amount.toLocaleString("en-US")})`
       : "";
-    lines.push("", `💳 ${t.pay}: ${r.pay.currency} ${r.pay.amount}${conv}`, r.pay.url);
+    lines.push("", `💳 ${t.pay}: ${r.pay.currency} ${r.pay.amount}${conv}`);
+    if (r.pay.payee) lines.push(`→ ${r.pay.payee}`);
+    lines.push(r.pay.url);
   }
 
   lines.push("", `_${t.why}_`);

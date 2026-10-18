@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { captureOrder } from "@/lib/paypal";
-import { updatePaymentStatus } from "@/lib/db";
+import { captureIdOf, captureOrder } from "@/lib/paypal";
+import { transitionPayment } from "@/lib/db";
 import { appendLedger } from "@/lib/ledger";
 
 export const runtime = "nodejs";
@@ -16,12 +16,14 @@ export async function GET(req: Request) {
 
   const captured = await captureOrder(orderId);
   if (!captured.ok) {
-    await updatePaymentStatus(orderId, "FAILED");
+    await transitionPayment({ orderId }, "FAILED");
     return NextResponse.redirect(`${appUrl}/?payment=failed`);
   }
 
   const status = captured.data.status; // COMPLETED
-  const checkId = await updatePaymentStatus(orderId, status);
-  await appendLedger("payment_captured", checkId, { orderId, status });
+  const captureId = captureIdOf(captured.data);
+  // The webhook may have recorded this already; only chain it once.
+  const changed = await transitionPayment({ orderId }, status, captureId);
+  if (changed) await appendLedger("payment_captured", changed.check_id, { orderId, captureId, status });
   return NextResponse.redirect(`${appUrl}/?payment=${status === "COMPLETED" ? "success" : "pending"}`);
 }
