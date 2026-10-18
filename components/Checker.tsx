@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CheckResult, Signal } from "@/lib/types";
+import { VERDICT_TITLE, reasonWithoutVerdict } from "@/lib/check/verdict-text";
 import f1 from "@/fixtures/01-obvious-scam.json";
 import f2 from "@/fixtures/02-subtle-scam.json";
 import f3 from "@/fixtures/03-safe-seller.json";
@@ -197,11 +198,13 @@ export default function Checker() {
         <section ref={resultRef} className={`verdict-in mt-6 scroll-mt-4 rounded-3xl border-2 p-5 ${ui.box}`} aria-live="polite">
           <div className="flex items-center gap-3">
             <span className={`h-4 w-4 shrink-0 rounded-full ${ui.dot}`} aria-hidden />
-            <h2 className={`text-3xl font-bold ${ui.text}`}>{ui.title}</h2>
+            <h2 dir={rtl ? "rtl" : "ltr"} className={`text-3xl font-bold ${ui.text} ${result.language === "ur" ? "urdu" : ""}`}>
+              {VERDICT_TITLE[result.language]?.[result.verdict] ?? ui.title}
+            </h2>
           </div>
 
           <p dir={rtl ? "rtl" : "ltr"} className={`mt-3 text-xl leading-relaxed text-ink ${result.language === "ur" ? "urdu" : ""}`}>
-            {result.reason}
+            {reasonWithoutVerdict(result.reason, result.verdict, result.language)}
           </p>
 
           {result.pay && (

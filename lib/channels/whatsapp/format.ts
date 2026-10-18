@@ -1,5 +1,6 @@
 import type { CheckResult, Lang, ReasonCode, Signal, Verdict } from "../../types";
 import { PHRASES } from "../../check/explain";
+import { reasonWithoutVerdict } from "../../check/verdict-text";
 
 /**
  * WhatsApp message text, in the sender's language.
@@ -146,11 +147,7 @@ export function formatResult(r: CheckResult, opts: { heard?: string } = {}): str
   if (opts.heard) lines.push(`🎙️ _${t.heard}: "${opts.heard.slice(0, 200)}${opts.heard.length > 200 ? "..." : ""}"_`, "");
   // The headline already says the verdict; don't repeat it at the start of the reason.
   const title = t.title[r.verdict];
-  let reason = r.reason.trim();
-  if (reason.toLowerCase().startsWith(title.toLowerCase())) {
-    reason = reason.slice(title.length).replace(/^[\s.,!،۔:-]+/, "");
-    if (r.language === "en" || r.language === "roman_ur") reason = reason.charAt(0).toUpperCase() + reason.slice(1);
-  }
+  const reason = reasonWithoutVerdict(r.reason, r.verdict, r.language);
   lines.push(`${DOT[r.verdict]} *${title}*`);
   if (reason) lines.push("", reason);
 
