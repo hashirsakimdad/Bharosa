@@ -100,6 +100,25 @@ Once a day, Bharosa stamps the newest hash in its chain on Bitcoin through [Open
 - Run it by hand: `curl -X POST -H "Authorization: Bearer $CRON_SECRET" https://<your-app>/api/anchor`
 - **`/proof`** is the public page for judges: chain status, live stats, recent records (hashes only), and each Bitcoin stamp with its file and `.ots` proof. Drop both onto opentimestamps.org to see the Bitcoin block. A fresh stamp takes a few hours to reach a block.
 
+## Deploy on Vercel (free)
+
+1. Go to **vercel.com/new**, choose **Import Git Repository**, and pick `hashirsakimdad/Bharosa`. If it isn't listed, click **Adjust GitHub App Permissions** and allow the repo.
+2. Leave the framework as **Next.js** and the build settings as default.
+3. Open **Environment Variables** and add everything from your `.env.local`:
+   `GEMINI_API_KEY`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `HASH_SALT`, `CRON_SECRET`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`, `FX_TO_USD`.
+   Don't add `TWILIO_SKIP_SIGNATURE`.
+4. Click **Deploy**. When it finishes, copy your URL (like `https://bharosa-xyz.vercel.app`).
+5. Add three more variables with that URL, then go to **Deployments → ⋯ → Redeploy**:
+   - `APP_URL=https://bharosa-xyz.vercel.app`
+   - `TWILIO_WEBHOOK_URL=https://bharosa-xyz.vercel.app/api/whatsapp`
+   - `PAYPAL_WEBHOOK_ID=` (after step 7)
+6. In Twilio's WhatsApp sandbox settings, set **When a message comes in** to `https://bharosa-xyz.vercel.app/api/whatsapp` (POST).
+7. In the PayPal developer dashboard, add a webhook for `https://bharosa-xyz.vercel.app/api/paypal/webhook` (events listed above) and put its ID in `PAYPAL_WEBHOOK_ID`.
+
+From then on, every push to `main` deploys automatically, and the daily Bitcoin stamp runs on its own (`vercel.json`).
+
+Submission material for the hackathon is in `docs/`: the Devpost write-up (`docs/SUBMISSION.md`) and a 3-minute demo video script (`docs/DEMO_SCRIPT.md`).
+
 ## Tests
 
 ```bash
