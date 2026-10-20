@@ -1,0 +1,363 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Nastaliq"; src: url("https://cdn.jsdelivr.net/npm/@fontsource/noto-nastaliq-urdu@5.1.0/files/noto-nastaliq-urdu-arabic-700-normal.woff2") format("woff2"); font-weight: 700; }
+  :root { --ink:#17120f; --paper:#faf7f2; --muted:#b9ad9f; --amber:#f2b544; --red:#dc2626; --red-soft:#fee2e2; --green:#15803d; --green-soft:#dcfce7; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; }
+  body { background: var(--ink); color: var(--paper); font-family: "Inter", sans-serif; position: relative; }
+  #bg { position: absolute; inset: -200px; background:
+      radial-gradient(1200px 800px at 10% 0%, rgba(242,181,68,.20), transparent 60%),
+      radial-gradient(1000px 700px at 100% 100%, var(--glow, rgba(220,38,38,.14)), transparent 60%); }
+  #grid { position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 48px 48px; mask-image: radial-gradient(1100px 800px at 35% 45%, #000 30%, transparent 75%); }
+  .abs { position: absolute; will-change: transform, opacity; opacity: 0; }
+  .display { font-family: "Inter Display", "Inter", sans-serif; font-weight: 800; letter-spacing: -.03em; }
+
+  /* scene 1 */
+  #s1a { left: 0; right: 0; top: 250px; text-align: center; font-size: 72px; }
+  #s1b { left: 50%; top: 420px; width: 900px; margin-left: -450px; background: #fff; color: #111; border-radius: 28px; border-bottom-left-radius: 8px; padding: 28px 34px; font-size: 38px; line-height: 1.35; box-shadow: 0 20px 60px rgba(0,0,0,.4); min-height: 190px; }
+  #s1b .who { display: block; font-size: 22px; font-weight: 700; color: #6b7280; margin-bottom: 8px; }
+  #s1c { left: 0; right: 0; top: 720px; text-align: center; font-size: 48px; color: var(--muted); }
+  #s1c b { color: #fca5a5; }
+
+  /* scene 2 */
+  #s2name { left: 0; right: 0; top: 270px; text-align: center; font-size: 240px; line-height: 1; }
+  #s2ur { left: 0; right: 0; top: 540px; text-align: center; font-family: "Nastaliq"; font-weight: 700; font-size: 84px; color: var(--amber); line-height: 1.8; }
+  #s2means { left: 0; right: 0; top: 700px; text-align: center; font-size: 30px; color: var(--muted); font-style: italic; }
+  #s2tag { left: 0; right: 0; top: 790px; text-align: center; font-size: 72px; }
+
+  /* captions */
+  .cap { left: 150px; top: 330px; width: 820px; }
+  .cap .step { font-size: 26px; font-weight: 700; letter-spacing: .1em; color: var(--amber); }
+  .cap h2 { margin-top: 22px; font-size: 92px; line-height: 1.02; }
+  .cap p { margin-top: 28px; font-size: 36px; line-height: 1.45; color: var(--muted); }
+
+  /* phone */
+  #phone { left: 1180px; top: 70px; width: 560px; height: 940px; background: #f3efe8; border-radius: 60px; padding: 18px; box-shadow: 0 50px 100px rgba(0,0,0,.55), 0 0 0 12px #2a221d, 0 0 0 13px #3a302a; }
+  .screen { position: relative; height: 100%; border-radius: 44px; overflow: hidden; background: #e9e4dc; }
+  .bar { background: #1f2937; color: #fff; padding: 26px 26px 20px; display: flex; align-items: center; gap: 16px; }
+  .avatar { width: 52px; height: 52px; border-radius: 50%; background: var(--amber); color: var(--ink); display: grid; place-items: center; font-weight: 800; font-size: 26px; }
+  .bar b { display: block; font-size: 25px; } .bar small { font-size: 18px; opacity: .7; }
+  .chat { position: absolute; left: 0; right: 0; top: 98px; padding: 22px 20px; display: flex; flex-direction: column; gap: 16px; opacity: 0; }
+  .msg { max-width: 88%; padding: 16px 20px; border-radius: 22px; font-size: 23px; line-height: 1.38; color: #111; box-shadow: 0 1px 1px rgba(0,0,0,.08); opacity: 0; }
+  .me { align-self: flex-end; background: #d7f5c8; border-bottom-right-radius: 7px; }
+  .bot { align-self: flex-start; background: #fff; border-bottom-left-radius: 7px; }
+  .fwd { display: block; font-size: 17px; font-style: italic; color: #6b7280; margin-bottom: 5px; }
+  .slot { position: relative; align-self: flex-start; width: 88%; }
+  .slot .msg { max-width: 100%; }
+  .dots { position: absolute; left: 0; top: 0; background: #fff; border-radius: 22px; border-bottom-left-radius: 7px; padding: 20px 24px; display: flex; gap: 9px; opacity: 0; }
+  .dots i { width: 13px; height: 13px; border-radius: 50%; background: #9ca3af; display: block; }
+  .verdict { font-weight: 800; font-size: 31px; display: flex; align-items: center; gap: 12px; }
+  .dot { width: 18px; height: 18px; border-radius: 50%; flex: none; }
+  .red .verdict { color: var(--red); } .red .dot { background: var(--red); }
+  .green .verdict { color: var(--green); } .green .dot { background: var(--green); }
+  .why { margin-top: 8px; font-size: 22px; color: #374151; }
+  .flags { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .flag { font-size: 21px; font-weight: 600; color: #991b1b; background: var(--red-soft); border-radius: 10px; padding: 8px 13px; opacity: 0; }
+  .pay { position: relative; margin-top: 14px; background: var(--green); color: #fff; font-weight: 700; font-size: 22px; text-align: center; border-radius: 13px; padding: 15px; overflow: hidden; }
+  .ripple { position: absolute; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.5); left: 50%; top: 50%; margin: -20px 0 0 -20px; opacity: 0; }
+
+  /* report counter */
+  #counter { left: 150px; top: 720px; display: flex; align-items: center; gap: 30px; }
+  #count { font-size: 150px; line-height: 1; color: #fca5a5; min-width: 110px; }
+  #counter span.lbl { font-size: 34px; color: var(--muted); line-height: 1.3; }
+
+  /* language chips */
+  #langs { left: 150px; top: 720px; display: flex; gap: 16px; }
+  .lang { font-size: 32px; font-weight: 600; padding: 14px 26px; border-radius: 999px; border: 2px solid rgba(250,247,242,.18); color: #e9e2d8; }
+  .lang.ur { font-family: "Nastaliq"; font-size: 30px; line-height: 1.2; padding-top: 6px; padding-bottom: 12px; }
+
+  /* chain */
+  #chainTitle { left: 0; right: 0; top: 150px; text-align: center; font-size: 76px; }
+  #chainSub { left: 0; right: 0; top: 260px; text-align: center; font-size: 36px; color: var(--muted); }
+  .block { top: 450px; width: 270px; height: 180px; border-radius: 22px; background: #221b17; border: 2px solid rgba(250,247,242,.16); padding: 22px 24px; }
+  .block .k { font-size: 20px; font-weight: 700; color: var(--amber); letter-spacing: .06em; }
+  .block .v { margin-top: 12px; font-size: 30px; font-weight: 700; }
+  .block .h { margin-top: 18px; font: 600 19px "DejaVu Sans Mono", monospace; color: #8f8478; }
+  .link { top: 538px; height: 6px; width: 90px; background: rgba(250,247,242,.35); border-radius: 3px; transform-origin: left center; }
+  #broken { left: 0; right: 0; top: 720px; text-align: center; font-size: 44px; font-weight: 700; color: #fca5a5; }
+  #btc { top: 318px; width: 116px; height: 116px; border-radius: 50%; background: #f7931a; color: #fff; display: grid; place-items: center; font-size: 72px; font-weight: 800; box-shadow: 0 16px 40px rgba(247,147,26,.45); }
+  #btcLabel { left: 0; right: 0; top: 720px; text-align: center; font-size: 44px; font-weight: 700; color: #fcd29a; }
+
+  /* closing */
+  #endName { left: 0; right: 0; top: 230px; text-align: center; font-size: 220px; line-height: 1; }
+  #endTag { left: 0; right: 0; top: 500px; text-align: center; font-size: 70px; }
+  #endChips { left: 0; right: 0; top: 650px; display: flex; justify-content: center; gap: 18px; }
+  .chip { font-size: 30px; font-weight: 600; padding: 14px 26px; border-radius: 999px; background: rgba(250,247,242,.08); border: 1px solid rgba(250,247,242,.16); color: #e9e2d8; }
+  #endFoot { left: 0; right: 0; top: 860px; text-align: center; font-size: 30px; color: var(--muted); }
+  #endFoot b { color: var(--amber); font-weight: 700; }
+  #brand { left: 70px; bottom: 50px; font-size: 32px; color: rgba(250,247,242,.5); }
+  #fade { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="bg"></div><div id="grid"></div>
+
+<!-- 1: problem -->
+<div id="s1a" class="abs display">Most online shopping here happens in DMs.</div>
+<div id="s1b" class="abs"><span class="who">Seller</span><span id="s1btext"></span></div>
+<div id="s1c" class="abs">If the parcel never comes, the money is <b>gone</b>.</div>
+
+<!-- 2: reveal -->
+<div id="s2name" class="abs display">Bharosa</div>
+<div id="s2ur" class="abs">بھروسہ</div>
+<div id="s2means" class="abs">means trust</div>
+<div id="s2tag" class="abs display">Check before you pay.</div>
+
+<!-- captions (filled by script) -->
+<div id="caps"></div>
+
+<div id="counter" class="abs"><span id="count" class="display">0</span><span class="lbl">people reported<br>this seller</span></div>
+<div id="langs" class="abs">
+  <span class="lang">English</span><span class="lang ur">اردو</span><span class="lang">Roman Urdu</span><span class="lang">العربية</span>
+</div>
+
+<!-- phone -->
+<div id="phone" class="abs"><div class="screen">
+  <div class="bar"><div class="avatar">B</div><div><b>Bharosa</b><small>scam check before you pay</small></div></div>
+
+  <div class="chat" id="c3">
+    <div class="msg me" id="c3m1"><span class="fwd">Forwarded</span>iPhone 15 Pro Max, only $280 🔥 Pay USDT to TQn9Y2…bLSE. Order on apple-store-pk.shop. 5 people waiting, ends tonight!</div>
+    <div class="slot">
+      <div class="dots" id="c3d"><i></i><i></i><i></i></div>
+      <div class="msg bot red" id="c3v">
+        <div class="verdict"><span class="dot"></span>Don't pay</div>
+        <div class="why">They want crypto to a wallet, which can never be refunded.</div>
+        <div class="flags">
+          <span class="flag" id="c3f1">✕ Crypto wallet address</span>
+          <span class="flag" id="c3f2">✕ Fake Apple website</span>
+          <span class="flag" id="c3f3">! Rushing you: "5 people waiting"</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat" id="c4">
+    <div class="msg me" id="c4m1"><span class="fwd">Forwarded</span>Bhai PS5 bilkul new, sirf 45k. Pehle 10000 advance JazzCash pe bhejo. COD nahi hai, jaldi karo!</div>
+    <div class="slot">
+      <div class="dots" id="c4d"><i></i><i></i><i></i></div>
+      <div class="msg bot red" id="c4v">
+        <div class="verdict"><span class="dot"></span>Paise mat bhejein</div>
+        <div class="why">Ye protected payment se inkaar kar raha hai aur pehle advance maang raha hai.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat" id="c5">
+    <div class="msg me" id="c5m1">REPORT</div>
+    <div class="msg bot" id="c5m2">Shukriya. Ab jo bhi is seller ko check karega usay aap ki report nazar aayegi.</div>
+    <div class="msg me" id="c5m3"><span class="fwd">Next buyer, same seller</span>PS5 new, sirf 45k bhai…</div>
+    <div class="msg bot red" id="c5m4"><div class="verdict"><span class="dot"></span>Paise mat bhejein</div><div class="why">3 log is seller ko fraud report kar chuke hain.</div></div>
+  </div>
+
+  <div class="chat" id="c6">
+    <div class="msg me" id="c6m1"><span class="fwd">Forwarded</span>Sony WH-1000XM5, sealed, $329. PayPal: ali.store@example.com or cash on delivery.</div>
+    <div class="slot">
+      <div class="dots" id="c6d"><i></i><i></i><i></i></div>
+      <div class="msg bot green" id="c6v">
+        <div class="verdict"><span class="dot"></span>Looks safe</div>
+        <div class="why">No warning signs found. Paying through PayPal keeps you protected.</div>
+        <div class="pay" id="c6pay"><span id="c6payText">Pay $329 safely via PayPal</span><span class="ripple" id="c6rip"></span></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<!-- chain -->
+<div id="chainTitle" class="abs display">Every check is chained.</div>
+<div id="chainSub" class="abs">Each record locks in the one before it.</div>
+<div id="blocks"></div>
+<div id="broken" class="abs">Edit one old record and the chain breaks.</div>
+<div id="btc" class="abs">₿</div>
+<div id="btcLabel" class="abs">Stamped on Bitcoin every day. Anyone can check it on /proof.</div>
+
+<!-- closing -->
+<div id="endName" class="abs display">Bharosa</div>
+<div id="endTag" class="abs display">Forward it before you pay.</div>
+<div id="endChips" class="abs">
+  <span class="chip">WhatsApp + web</span><span class="chip">4 languages</span><span class="chip">PayPal buyer protection</span><span class="chip">Stamped on Bitcoin</span>
+</div>
+<div id="endFoot" class="abs"><b>PayPal AI Hackathon 2026</b> · github.com/hashirsakimdad/Bharosa</div>
+
+<div id="brand" class="abs display">Bharosa</div>
+<div id="fade"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const out3 = (x) => 1 - Math.pow(1 - clamp(x), 3);
+const inout = (x) => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const back = (x) => { x = clamp(x); const c = 1.6; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const p = (t, s, d) => clamp((t - s) / d);
+/** 0 -> 1 between s and e, with fades of length f at both ends */
+const win = (t, s, e, f = .5) => Math.min(out3(p(t, s, f)), 1 - out3(p(t, e - f, f)));
+function set(el, o, x = 0, y = 0, s = 1, r = 0) {
+  if (typeof el === "string") el = $(el);
+  el.style.opacity = o.toFixed(3);
+  el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) scale(${s.toFixed(4)}) rotate(${r.toFixed(2)}deg)`;
+}
+/** element appears at `at` (rises in), stays until scene end */
+function rise(el, t, at, d = .5, dist = 26) { const k = out3(p(t, at, d)); set(el, k, 0, (1 - k) * dist); }
+function pop(el, t, at, d = .55) { const k = p(t, at, d); set(el, out3(k * 1.6), 0, (1 - out3(k)) * 14, .9 + .1 * back(k)); }
+
+// ---------- captions ----------
+const CAPS = [
+  { s: 14.4, e: 20.6, step: "STEP 1", h: "Forward the seller's message.", t: "On WhatsApp or the web. No app, no sign-up." },
+  { s: 20.6, e: 26.0, step: "IN SECONDS", h: "Red, yellow or green.", t: "Fixed rules pick the color. AI only reads the message and explains." },
+  { s: 26.0, e: 31.2, step: "THE EVIDENCE", h: "Every reason, shown.", t: "Crypto wallet. Fake Apple website. Pressure to hurry." },
+  { s: 31.2, e: 42.2, step: "ANY LANGUAGE", h: "Answers in your language.", t: "Write in Roman Urdu, get Roman Urdu back." },
+  { s: 42.2, e: 52.2, step: "COMMUNITY", h: "One report warns the next buyer.", t: "Numbers are stored only as private fingerprints." },
+  { s: 52.2, e: 59.6, step: "PAY SAFELY", h: "Looks safe? Pay through PayPal.", t: "Exact price, straight to the seller, with buyer protection." },
+  { s: 59.6, e: 64.4, step: "HARD RULE", h: "Red never gets a pay link.", t: "If it looks like a scam, there is no button to press." },
+];
+const capsEl = $("caps");
+CAPS.forEach((c, i) => {
+  const d = document.createElement("div");
+  d.className = "abs cap"; d.id = "cap" + i;
+  d.innerHTML = `<div class="step">${c.step}</div><h2 class="display">${c.h}</h2><p>${c.t}</p>`;
+  capsEl.appendChild(d);
+});
+
+// ---------- chain blocks ----------
+const BLOCKS = [
+  { k: "#1280 · CHECK", v: "Don't pay", h: "a41c…09e2" },
+  { k: "#1281 · REPORT", v: "Seller reported", h: "7d20…b31f" },
+  { k: "#1282 · CHECK", v: "Don't pay", h: "c9e8…44a0" },
+  { k: "#1283 · PAYMENT", v: "Paid $329", h: "1f6b…e7c5" },
+  { k: "#1284 · CHECK", v: "Looks safe", h: "9f3c…e7b2" },
+];
+const X0 = 145, STEP = 360;
+BLOCKS.forEach((b, i) => {
+  const d = document.createElement("div");
+  d.className = "abs block"; d.id = "b" + i; d.style.left = (X0 + i * STEP) + "px";
+  d.innerHTML = `<div class="k">${b.k}</div><div class="v" id="bv${i}">${b.v}</div><div class="h">${b.h}</div>`;
+  $("blocks").appendChild(d);
+  if (i < BLOCKS.length - 1) {
+    const l = document.createElement("div");
+    l.className = "abs link"; l.id = "l" + i; l.style.left = (X0 + i * STEP + 270) + "px";
+    $("blocks").appendChild(l);
+  }
+});
+$("btc").style.left = (X0 + 4 * STEP + 77) + "px";
+
+const S1TEXT = "iPhone 15 Pro, only $280 🔥 Send the advance to my account first. 5 people are waiting.";
+const DURATION = 86;
+
+function dotsAnim(id, t, s, e) {
+  const el = $(id);
+  const o = win(t, s, e, .25);
+  el.style.opacity = o.toFixed(3);
+  [...el.children].forEach((c, i) => { c.style.transform = `translateY(${(-7 * Math.max(0, Math.sin((t - s) * 7 - i * .9))).toFixed(1)}px)`; });
+}
+
+function render(t) {
+  // background glow color shifts with the story
+  const glow = t < 52 ? "rgba(220,38,38,.14)" : t < 64.5 ? "rgba(21,128,61,.20)" : "rgba(247,147,26,.16)";
+  document.body.style.setProperty("--glow", glow);
+  $("bg").style.transform = `translate(${(Math.sin(t / 9) * 40).toFixed(1)}px, ${(Math.cos(t / 11) * 30).toFixed(1)}px)`;
+
+  // ---- 1: problem (0 - 7.4)
+  const s1 = 1 - out3(p(t, 6.8, .6));
+  { const k = out3(p(t, .3, .8)); set("s1a", k * s1, 0, (1 - k) * 30); }
+  { const k = out3(p(t, 1.4, .6)); set("s1b", k * s1, 0, (1 - k) * 40, .96 + .04 * k); }
+  { const n = Math.round(S1TEXT.length * clamp((t - 1.8) / 2.2)); $("s1btext").textContent = [...S1TEXT].slice(0, n).join("") + (t > 1.8 && t < 4.3 && Math.floor(t * 3) % 2 ? "▍" : ""); }
+  { const k = out3(p(t, 4.6, .7)); set("s1c", k * s1, 0, (1 - k) * 24); }
+
+  // ---- 2: reveal (7.4 - 13.8)
+  const s2 = 1 - out3(p(t, 13.2, .6));
+  { const k = out3(p(t, 7.6, 1.1)); set("s2name", k * s2, 0, (1 - k) * 30, .92 + .08 * k); }
+  { const k = out3(p(t, 8.8, .8)); set("s2ur", k * s2, 0, (1 - k) * 20); }
+  { const k = out3(p(t, 9.4, .7)); set("s2means", k * s2); }
+  { const k = out3(p(t, 10.4, .8)); set("s2tag", k * s2, 0, (1 - k) * 26); }
+
+  // ---- captions
+  CAPS.forEach((c, i) => { const k = win(t, c.s, c.e, .5); const kin = out3(p(t, c.s, .6)); set("cap" + i, k, 0, (1 - kin) * 30); });
+
+  // ---- phone (13.8 - 64.6)
+  { const kin = out3(p(t, 13.8, .9)), kout = out3(p(t, 64.0, .7)); set("phone", kin * (1 - kout), (1 - kin) * 260 + kout * 260, 0, 1, 2 * kin - 2 * kout); }
+  // chat 3
+  $("c3").style.opacity = win(t, 14.0, 31.4, .4).toFixed(3);
+  rise("c3m1", t, 15.0);
+  dotsAnim("c3d", t, 16.1, 17.5);
+  pop("c3v", t, 17.5);
+  ["c3f1", "c3f2", "c3f3"].forEach((id, i) => {
+    const at = 18.7 + i * .6; const k = out3(p(t, at, .45));
+    const pulse = t > 26.2 && t < 29.6 ? 1 + .04 * Math.max(0, Math.sin((t - 26.2 - i * .5) * 4)) : 1;
+    set(id, k, (1 - k) * -30, 0, pulse);
+  });
+  // chat 4
+  $("c4").style.opacity = win(t, 31.4, 42.4, .4).toFixed(3);
+  rise("c4m1", t, 32.0);
+  dotsAnim("c4d", t, 33.0, 34.3);
+  pop("c4v", t, 34.3);
+  { const k = win(t, 36.2, 42.0, .5); set("langs", k, 0, (1 - out3(p(t, 36.2, .6))) * 20);
+    [...$("langs").children].forEach((c, i) => {
+      const on = Math.floor(clamp((t - 36.6) / .9, 0, 3.99)) === i && t > 36.6;
+      c.style.background = on ? "rgba(242,181,68,.22)" : "transparent";
+      c.style.borderColor = on ? "rgba(242,181,68,.8)" : "rgba(250,247,242,.18)";
+    }); }
+  // chat 5
+  $("c5").style.opacity = win(t, 42.4, 52.4, .4).toFixed(3);
+  rise("c5m1", t, 42.9); rise("c5m2", t, 43.8); rise("c5m3", t, 47.6); pop("c5m4", t, 48.8);
+  { const k = win(t, 44.6, 52.0, .5); set("counter", k, 0, (1 - out3(p(t, 44.6, .6))) * 20);
+    const n = t < 45.2 ? 1 : t < 46.0 ? 2 : 3; $("count").textContent = n;
+    $("count").style.transform = `scale(${(1 + .15 * Math.max(0, 1 - ((t - (n === 1 ? 44.6 : n === 2 ? 45.2 : 46.0)) / .3))).toFixed(3)})`; }
+  // chat 6
+  $("c6").style.opacity = win(t, 52.4, 64.6, .4).toFixed(3);
+  rise("c6m1", t, 53.0);
+  dotsAnim("c6d", t, 54.0, 55.3);
+  pop("c6v", t, 55.3);
+  { const tap = 57.4; const k = p(t, tap, .6);
+    set("c6rip", k > 0 && k < 1 ? 1 - k : 0, 0, 0, 1 + 9 * out3(k));
+    $("c6pay").style.transform = `scale(${(t > tap && t < tap + .18 ? .96 : 1)})`;
+    const paid = t > tap + .45;
+    $("c6payText").textContent = paid ? "✓ Paid · buyer protection on" : "Pay $329 safely via PayPal";
+    $("c6pay").style.background = paid ? "#166534" : "var(--green)"; }
+
+  // ---- chain (64.6 - 77.2)
+  const sc = win(t, 64.8, 77.2, .6);
+  { const k = out3(p(t, 64.9, .7)); set("chainTitle", sc, 0, (1 - k) * 24); }
+  { const k = out3(p(t, 65.4, .7)); set("chainSub", sc * (1 - win(t, 69.4, 72.6, .4)), 0, (1 - k) * 20); }
+  const broken = t > 69.6 && t < 72.4;
+  BLOCKS.forEach((b, i) => {
+    const at = 65.6 + i * .45; const k = out3(p(t, at, .5));
+    const shake = (i === 2 && t > 69.6 && t < 70.3) ? Math.sin(t * 70) * 8 : 0;
+    set("b" + i, k * sc, shake, (1 - k) * 40);
+    const bad = broken && i >= 2;
+    $("b" + i).style.borderColor = bad ? "rgba(220,38,38,.9)" : "rgba(250,247,242,.16)";
+    $("b" + i).style.background = bad ? "#3a1514" : "#221b17";
+    if (i === 2) $("bv2").textContent = broken ? "Looks safe ✎" : "Don't pay";
+    if (i < BLOCKS.length - 1) {
+      const lk = out3(p(t, at + .35, .4));
+      const l = $("l" + i); l.style.opacity = (sc * lk).toFixed(3);
+      const gap = broken && i >= 1 ? .45 : 1;
+      l.style.transform = `scaleX(${(lk * gap).toFixed(3)})`;
+      l.style.background = broken && i >= 1 ? "rgba(220,38,38,.9)" : "rgba(250,247,242,.35)";
+    }
+  });
+  { const k = win(t, 70.0, 72.4, .4); set("broken", k * sc, 0, (1 - out3(p(t, 70.0, .5))) * 16); }
+  { const k = p(t, 73.0, .7); set("btc", sc * clamp(k * 3), 0, (1 - out3(k)) * -220, .6 + .4 * back(k), (1 - out3(k)) * -90); }
+  { const k = out3(p(t, 73.7, .6)); set("btcLabel", k * sc, 0, (1 - k) * 18); }
+
+  // ---- closing (77.2 - 86)
+  const se = 1;
+  { const k = out3(p(t, 77.6, 1.0)); set("endName", k * se, 0, (1 - k) * 30, .94 + .06 * k); }
+  { const k = out3(p(t, 78.6, .7)); set("endTag", k, 0, (1 - k) * 24); }
+  { const k = out3(p(t, 79.4, .7)); set("endChips", k, 0, (1 - k) * 20); }
+  { const k = out3(p(t, 80.2, .7)); set("endFoot", k); }
+
+  // brand mark during the product scenes
+  set("brand", win(t, 14.4, 76.8, .6));
+  // fade from/to black
+  $("fade").style.opacity = Math.max(1 - p(t, 0, .6), p(t, DURATION - 1.2, 1.2)).toFixed(3);
+}
+window.render = render;
+window.DURATION = DURATION;
+render(0);
+</script>
+</body>
+</html>
