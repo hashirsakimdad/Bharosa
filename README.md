@@ -2,7 +2,7 @@
 
 **Check before you pay.** Forward a seller's message, link or screenshot. Bharosa tells you in seconds if it's safe to pay, shows the evidence, and lets you pay through PayPal so you're covered by buyer protection.
 
-Built for the PayPal AI Hackathon 2026.
+Built for the PayPal AI Hackathon 2026. MIT licensed.
 
 - Green / yellow / red verdict with a one-line reason in the user's language (English, Urdu, Roman Urdu, Arabic)
 - Fixed rules pick the color. AI only reads the message and writes the explanation
@@ -11,6 +11,29 @@ Built for the PayPal AI Hackathon 2026.
 - Tamper-evident hash chain: every check, report and payment is chained, stamped on Bitcoin daily, and anyone can verify it on `/proof`
 - Works on WhatsApp too: forward a message, screenshot or voice note, get the verdict in the same chat
 - Works with zero API keys (rules-only mode), so the demo never fully breaks
+
+## How Bharosa uses PayPal and AI
+
+**PayPal developer platform (sandbox):**
+
+| PayPal tool | What it does in Bharosa |
+|---|---|
+| OAuth 2.0 client credentials (`/v1/oauth2/token`) | Server-side access token, cached until expiry (`lib/paypal.ts`) |
+| Orders API v2: create order (`/v2/checkout/orders`) | Makes the "Pay safely with PayPal" checkout for the exact price on green/yellow verdicts, with the seller as payee when they gave a PayPal email. Red verdicts never get an order. |
+| Orders API v2: capture (`/v2/checkout/orders/{id}/capture`) | Captures the payment when the buyer returns from PayPal (`app/api/paypal/return`) |
+| Webhooks + verify-webhook-signature (`/v1/notifications/verify-webhook-signature`) | Receives `PAYMENT.CAPTURE.COMPLETED`, `DENIED`, `REFUNDED` and `CUSTOMER.DISPUTE.CREATED`, verified with PayPal before acting. A dispute is filed as a scam report against that seller (`app/api/paypal/webhook`, `lib/paypal-webhook.ts`). |
+
+**AI:**
+
+| AI tool | What it does in Bharosa |
+|---|---|
+| Google Gemini 2.5 Flash (fallback: 2.5 Flash-Lite), free tier, REST API | Reads the forwarded text or chat screenshot (vision) and extracts seller, price, payment method, links, phone numbers, wallet addresses and pressure phrases as strict JSON; estimates the typical market price; transcribes WhatsApp voice notes; writes the one-line explanation in the user's language (`lib/check/extract.ts`, `transcribe.ts`, `explain.ts`) |
+
+The AI never decides the verdict. Fixed rules in `lib/check/verdict.ts` pick red / yellow / green from the signals, so every result is repeatable and explainable.
+
+**Other tools:** Next.js 14, TypeScript, Tailwind, Supabase (Postgres + RLS), Twilio WhatsApp API, OpenTimestamps (Bitcoin anchoring), RDAP (domain age), Google Safe Browsing (optional), Vercel (hosting + cron). No hackathon sponsor tools were used.
+
+**Built with AI assistance:** Claude (Anthropic) was used as a coding assistant during development. The explainer video narration and music were generated with ElevenLabs.
 
 ## Quick start
 
