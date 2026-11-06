@@ -161,7 +161,7 @@ export default function Checker({ embedded = false }: { embedded?: boolean }) {
         <div className="mt-3 flex gap-2">
           <button
             onClick={() => fileRef.current?.click()}
-            className="rounded-2xl border border-stone-300 px-4 py-4 text-base font-medium hover:bg-stone-50"
+            className="press rounded-2xl border border-stone-300 px-4 py-4 text-base font-medium hover:bg-stone-50"
           >
             Add screenshot
           </button>
@@ -169,7 +169,7 @@ export default function Checker({ embedded = false }: { embedded?: boolean }) {
           <button
             onClick={check}
             disabled={loading || (!text.trim() && !image)}
-            className="flex-1 rounded-2xl bg-ink px-4 py-4 text-lg font-semibold text-white transition disabled:opacity-40"
+            className={`press flex-1 rounded-2xl bg-ink px-4 py-4 text-lg font-semibold text-white transition disabled:opacity-40 ${loading ? "scan" : ""}`}
           >
             {loading ? "Checking..." : "Check"}
           </button>
@@ -186,7 +186,7 @@ export default function Checker({ embedded = false }: { embedded?: boolean }) {
               setImage(null);
               setResult(null);
             }}
-            className="rounded-full border border-stone-300 bg-white px-3 py-1.5 text-sm hover:bg-stone-100"
+            className="press rounded-full border border-stone-300 bg-white px-3 py-1.5 text-sm transition hover:-translate-y-0.5 hover:bg-stone-100"
           >
             {s.short}
           </button>
