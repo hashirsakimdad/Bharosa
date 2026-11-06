@@ -27,7 +27,7 @@ Built for the PayPal AI Hackathon 2026. MIT licensed.
 
 | AI tool | What it does in Bharosa |
 |---|---|
-| Google Gemini 2.5 Flash (fallback: 2.5 Flash-Lite), free tier, REST API | Reads the forwarded text or chat screenshot (vision) and extracts seller, price, payment method, links, phone numbers, wallet addresses and pressure phrases as strict JSON; estimates the typical market price; transcribes WhatsApp voice notes; writes the one-line explanation in the user's language (`lib/check/extract.ts`, `transcribe.ts`, `explain.ts`) |
+| Google Gemini 3 Flash (fallback: 3.1 Flash-Lite), free tier, REST API | Reads the forwarded text or chat screenshot (vision) and extracts seller, price, payment method, links, phone numbers, wallet addresses and pressure phrases as strict JSON; estimates the typical market price; transcribes WhatsApp voice notes; writes the one-line explanation in the user's language (`lib/check/extract.ts`, `transcribe.ts`, `explain.ts`) |
 
 The AI never decides the verdict. Fixed rules in `lib/check/verdict.ts` pick red / yellow / green from the signals, so every result is repeatable and explainable.
 

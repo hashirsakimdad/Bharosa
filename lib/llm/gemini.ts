@@ -73,8 +73,8 @@ export async function generate(
   prompt: string,
   opts: { images?: GeminiImage[]; json?: boolean; timeoutMs?: number } = {},
 ): Promise<string> {
-  const main = process.env.GEMINI_MODEL || "gemini-2.5-flash";
-  const fallback = process.env.GEMINI_FALLBACK_MODEL || "gemini-2.5-flash-lite";
+  const main = process.env.GEMINI_MODEL || "gemini-3-flash-preview";
+  const fallback = process.env.GEMINI_FALLBACK_MODEL || "gemini-3.1-flash-lite";
   const images = opts.images ?? [];
   const json = opts.json ?? false;
   const timeoutMs = opts.timeoutMs ?? 20000;
@@ -83,7 +83,7 @@ export async function generate(
     return await callModel(main, prompt, images, json, timeoutMs);
   } catch (err) {
     const status = err instanceof GeminiError ? err.status : undefined;
-    const retryable = status === undefined || status === 429 || status >= 500;
+    const retryable = status === undefined || status === 404 || status === 429 || status >= 500;
     if (!retryable || fallback === main) throw err;
     return await callModel(fallback, prompt, images, json, timeoutMs);
   }
