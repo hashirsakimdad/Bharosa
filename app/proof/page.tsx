@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import SiteNav from "@/components/site/SiteNav";
+import SiteFooter from "@/components/site/SiteFooter";
 import { getStats, recentLedger } from "@/lib/db";
 import { verifyLedger, type LedgerVerification } from "@/lib/ledger";
 import { listAnchors, type AnchorRow } from "@/lib/anchor";
@@ -52,12 +54,12 @@ export default async function ProofPage() {
   const anchoredHere = anchors[0];
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 pb-20 pt-8 sm:pt-14">
-      <header>
-        <Link href="/" className="text-sm font-semibold tracking-wide text-stone-500 hover:text-ink">
-          BHAROSA
-        </Link>
-        <h1 className="mt-1 text-[2rem] font-bold leading-tight sm:text-4xl">Don&apos;t trust us. Check.</h1>
+    <>
+    <SiteNav current="proof" />
+    <main className="mx-auto w-full max-w-3xl px-4 pb-20 pt-6 sm:pt-10">
+      <header className="rise">
+        <p className="text-sm font-semibold tracking-wide text-stone-500">PUBLIC PROOF</p>
+        <h1 className="mt-1 text-[2.2rem] font-extrabold leading-tight tracking-tight sm:text-5xl">Don&apos;t trust us. Check.</h1>
         <p className="mt-3 max-w-2xl text-lg text-stone-600">
           Every check, scam report and payment is written into a chain where each record locks in the one before it. Every
           day the newest link is stamped on Bitcoin. Change or delete one old record and the chain breaks, and it no longer
@@ -74,14 +76,14 @@ export default async function ProofPage() {
         <>
           {/* Chain status */}
           <section
-            className={`mt-8 rounded-3xl border-2 p-5 ${
+            className={`rise d1 mt-8 rounded-3xl border-2 p-5 ${
               chain?.valid ? "border-safe-line bg-safe-soft" : chain ? "border-danger-line bg-danger-soft" : "border-stone-200 bg-white"
             }`}
           >
             <div className="flex items-center gap-3">
               <span
                 aria-hidden
-                className={`h-4 w-4 rounded-full ${chain?.valid ? "bg-safe" : chain ? "bg-danger" : "bg-stone-300"}`}
+                className={`ping h-4 w-4 rounded-full ${chain?.valid ? "bg-safe text-safe" : chain ? "bg-danger" : "bg-stone-300"}`}
               />
               <h2 className={`text-2xl font-bold ${chain?.valid ? "text-safe" : chain ? "text-danger" : ""}`}>
                 {chain?.valid ? "Chain intact" : chain ? "Chain broken" : "Couldn't check the chain"}
@@ -103,14 +105,14 @@ export default async function ProofPage() {
           </section>
 
           {/* Stats */}
-          <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <section className="rise d2 mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
               ["Checks", stats.checks],
               ["Don't pay", stats.danger],
               ["Scam reports", stats.reports],
               ["Safe payments", stats.paymentsCompleted],
             ].map(([label, n]) => (
-              <div key={label as string} className="rounded-2xl border border-stone-200 bg-white p-4">
+              <div key={label as string} className="lift rounded-2xl border border-stone-200 bg-white p-4">
                 <p className="text-3xl font-bold tabular-nums">{(n as number).toLocaleString()}</p>
                 <p className="mt-1 text-sm text-stone-600">{label}</p>
               </div>
@@ -125,14 +127,14 @@ export default async function ProofPage() {
 
           {/* Bitcoin anchors */}
           <section className="mt-10">
-            <h2 className="text-xl font-bold">Stamped on Bitcoin</h2>
+            <h2 className="text-2xl font-bold">Stamped on Bitcoin</h2>
             {anchors.length === 0 ? (
               <p className="mt-2 text-stone-600">No stamps yet. The first one is made at the next daily run.</p>
             ) : (
               <>
                 <ul className="mt-3 space-y-2">
                   {anchors.map((a) => (
-                    <li key={a.id} className="rounded-2xl border border-stone-200 bg-white p-4">
+                    <li key={a.id} className="lift rounded-2xl border border-stone-200 bg-white p-4">
                       <div className="flex flex-wrap items-baseline justify-between gap-2">
                         <p className="font-semibold">First {Number(a.ledger_seq).toLocaleString()} records</p>
                         <p className="text-sm text-stone-500">{ago(a.created_at)}</p>
@@ -141,13 +143,13 @@ export default async function ProofPage() {
                       <div className="mt-3 flex flex-wrap gap-2">
                         <a
                           href={`/api/anchors/${a.id}/anchor.txt`}
-                          className="rounded-full border border-stone-300 px-3 py-1.5 text-sm hover:bg-stone-100"
+                          className="press rounded-full border border-stone-300 bg-white px-3 py-1.5 text-sm hover:bg-stone-100"
                         >
                           Download file
                         </a>
                         <a
                           href={`/api/anchors/${a.id}/anchor.txt.ots`}
-                          className="rounded-full border border-stone-300 px-3 py-1.5 text-sm hover:bg-stone-100"
+                          className="press rounded-full border border-stone-300 bg-white px-3 py-1.5 text-sm hover:bg-stone-100"
                         >
                           Download proof (.ots)
                         </a>
@@ -182,7 +184,7 @@ export default async function ProofPage() {
           {/* Recent records */}
           {entries.length > 0 && (
             <section className="mt-10">
-              <h2 className="text-xl font-bold">Latest records</h2>
+              <h2 className="text-2xl font-bold">Latest records</h2>
               <p className="mt-1 text-sm text-stone-600">
                 Only hashes are public. Phone numbers and messages never appear here.
               </p>
@@ -198,7 +200,7 @@ export default async function ProofPage() {
                   </thead>
                   <tbody>
                     {entries.map((e) => (
-                      <tr key={e.seq} className="border-t border-stone-100">
+                      <tr key={e.seq} className="border-t border-stone-100 transition-colors hover:bg-stone-50">
                         <td className="px-3 py-2 tabular-nums text-stone-500">{e.seq}</td>
                         <td className="px-3 py-2">{KIND_LABEL[e.kind] ?? e.kind}</td>
                         <td className="hidden px-3 py-2 font-mono text-xs text-stone-600 sm:table-cell">{short(e.entry_hash)}</td>
@@ -214,7 +216,7 @@ export default async function ProofPage() {
       )}
 
       <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-5">
-        <h2 className="text-xl font-bold">How the verdict is made</h2>
+        <h2 className="text-2xl font-bold">How the verdict is made</h2>
         <ul className="mt-3 space-y-2 text-[15px] text-stone-700">
           <li>
             <strong>AI reads, rules decide.</strong> Gemini reads the message, screenshot or voice note. Fixed rules pick the
@@ -234,11 +236,8 @@ export default async function ProofPage() {
         </ul>
       </section>
 
-      <footer className="mt-10 text-center text-sm text-stone-500">
-        <Link href="/" className="underline">
-          Check a seller
-        </Link>
-      </footer>
     </main>
+    <SiteFooter />
+    </>
   );
 }

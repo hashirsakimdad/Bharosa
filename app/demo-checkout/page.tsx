@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SiteNav from "@/components/site/SiteNav";
 
 export const dynamic = "force-dynamic";
 
@@ -10,11 +11,13 @@ export default function DemoCheckout({ searchParams }: { searchParams: Record<st
   const { token = "", checkId = "", amount = "0.00", currency = "USD", payee, item } = searchParams;
   const approve = `/api/paypal/return?token=${encodeURIComponent(token)}&checkId=${encodeURIComponent(checkId)}`;
   return (
-    <main className="mx-auto w-full max-w-xl px-4 pb-16 pt-8 sm:pt-14">
-      <div className="rounded-2xl border-2 border-dashed border-careful-line bg-careful-soft px-4 py-3 text-base font-semibold text-careful">
+    <>
+    <SiteNav />
+    <main className="mx-auto w-full max-w-xl px-4 pb-16 pt-6 sm:pt-10">
+      <div className="rise rounded-2xl border-2 border-dashed border-careful-line bg-careful-soft px-4 py-3 text-base font-semibold text-careful">
         Demo mode: PayPal sandbox keys aren&apos;t configured, so this is a simulated checkout. No real payment is made.
       </div>
-      <section className="mt-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+      <section className="pop mt-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
         <p className="text-sm font-semibold tracking-wide text-stone-500">BHAROSA SAFE PAY · DEMO</p>
         <h1 className="mt-2 text-3xl font-bold">
           {currency} {amount}
@@ -34,7 +37,7 @@ export default function DemoCheckout({ searchParams }: { searchParams: Record<st
             <dd className="font-mono text-sm">{token}</dd>
           </div>
         </dl>
-        <a href={approve} className="mt-6 flex w-full justify-center rounded-2xl bg-safe px-4 py-4 text-lg font-bold text-white">
+        <a href={approve} className="press mt-6 flex w-full justify-center rounded-2xl bg-safe hover:brightness-110 px-4 py-4 text-lg font-bold text-white">
           Approve demo payment
         </a>
         <Link href="/?payment=cancelled" className="mt-3 block text-center text-base text-stone-500 underline">
@@ -42,5 +45,6 @@ export default function DemoCheckout({ searchParams }: { searchParams: Record<st
         </Link>
       </section>
     </main>
+    </>
   );
 }

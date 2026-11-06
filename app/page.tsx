@@ -1,6 +1,8 @@
 import Checker from "@/components/Checker";
 import HeroDemo from "@/components/landing/HeroDemo";
 import Reveal from "@/components/landing/Reveal";
+import SiteNav from "@/components/site/SiteNav";
+import SiteFooter from "@/components/site/SiteFooter";
 
 const STEPS = [
   { n: "1", t: "Forward it", d: "Paste the seller's message, drop a chat screenshot, share a link or send a voice note. On the web or on WhatsApp." },
@@ -24,17 +26,7 @@ const TRUST = [
 export default function Home() {
   return (
     <div className="overflow-x-hidden">
-      {/* Nav */}
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
-        <a href="/" className="text-lg font-extrabold tracking-wide">
-          BHAROSA<span className="text-safe">.</span>
-        </a>
-        <div className="flex items-center gap-1 sm:gap-5">
-          <a href="#how" className="hidden px-2 py-2 text-[15px] text-stone-600 hover:text-ink sm:block">How it works</a>
-          <a href="/proof" className="hidden px-2 py-2 text-[15px] text-stone-600 hover:text-ink sm:block">Proof</a>
-          <a href="#check" className="press rounded-full bg-ink px-4 py-2.5 text-[15px] font-semibold text-white hover:bg-stone-800">Check a seller</a>
-        </div>
-      </nav>
+      <SiteNav current="home" />
 
       {/* Hero */}
       <header className="mx-auto grid max-w-6xl items-center gap-12 px-4 pb-16 pt-8 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:pt-16">
@@ -141,10 +133,7 @@ export default function Home() {
         <a href="#check" className="mt-8 inline-block rounded-2xl bg-ink px-8 py-4 text-lg font-semibold text-white hover:bg-stone-800">Check a seller</a>
       </section>
 
-      <footer className="border-t border-stone-200 px-4 py-8 text-center text-sm text-stone-500">
-        Bharosa · built for the PayPal AI Hackathon · <a href="/proof" className="underline">Proof</a> ·{" "}
-        <a href="https://github.com/hashirsakimdad/Bharosa" className="underline">GitHub</a>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
