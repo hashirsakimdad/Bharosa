@@ -46,8 +46,10 @@ export default function Checker() {
   const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const p = new URLSearchParams(window.location.search).get("payment");
-    if (p === "success") setBanner("Payment done through PayPal. You're covered by buyer protection.");
+    const qs = new URLSearchParams(window.location.search);
+    const p = qs.get("payment");
+    if (p === "success" && qs.get("demo")) setBanner("Demo payment approved. In demo mode no real money moves; with live keys this is a PayPal payment with buyer protection.");
+    else if (p === "success") setBanner("Payment done through PayPal. You're covered by buyer protection.");
     if (p === "cancelled") setBanner("Payment cancelled. No money was sent.");
     if (p === "failed") setBanner("Payment didn't go through. No money was sent.");
     if (p) window.history.replaceState(null, "", "/");

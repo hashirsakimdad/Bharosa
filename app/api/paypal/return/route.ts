@@ -25,5 +25,6 @@ export async function GET(req: Request) {
   // The webhook may have recorded this already; only chain it once.
   const changed = await transitionPayment({ orderId }, status, captureId);
   if (changed) await appendLedger("payment_captured", changed.check_id, { orderId, captureId, status });
-  return NextResponse.redirect(`${appUrl}/?payment=${status === "COMPLETED" ? "success" : "pending"}`);
+  const demo = orderId.startsWith("DEMO") ? "&demo=1" : "";
+  return NextResponse.redirect(`${appUrl}/?payment=${status === "COMPLETED" ? "success" : "pending"}${demo}`);
 }

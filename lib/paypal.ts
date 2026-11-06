@@ -9,8 +9,20 @@ const BASE = () => process.env.PAYPAL_BASE_URL || "https://api-m.sandbox.paypal.
 
 let cachedToken: { value: string; expiresAt: number } | null = null;
 
-export function paypalConfigured(): boolean {
+function realPaypalConfigured(): boolean {
   return Boolean(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET);
+}
+
+/**
+ * Demo mode: with no PayPal keys and PAYPAL_DEMO=true, pay links open a clearly labelled
+ * demo checkout inside Bharosa instead of PayPal. No money moves and PayPal is not called.
+ */
+export function paypalDemo(): boolean {
+  return !realPaypalConfigured() && process.env.PAYPAL_DEMO === "true";
+}
+
+export function paypalConfigured(): boolean {
+  return realPaypalConfigured() || paypalDemo();
 }
 
 async function getToken(): Promise<Result<string>> {
@@ -100,6 +112,7 @@ interface PayPalOrder {
   id: string;
   status: string;
   links?: Array<{ href: string; rel: string }>;
+  purchase_units?: Array<{ payments?: { captures?: Array<{ id?: string }> } }>;
 }
 
 export async function createOrder(params: {
@@ -111,6 +124,12 @@ export async function createOrder(params: {
   payeeEmail?: string;
 }): Promise<Result<{ orderId: string; approveUrl: string }>> {
   const appUrl = process.env.APP_URL || "http://localhost:3000";
+  if (paypalDemo()) {
+    const orderId = `DEMO${params.checkId.replace(/-/g, "").slice(0, 14).toUpperCase()}`;
+    const q = new URLSearchParams({ token: orderId, checkId: params.checkId, amount: params.value, currency: params.currency, item: params.description });
+    if (params.payeeEmail) q.set("payee", params.payeeEmail);
+    return { ok: true, data: { orderId, approveUrl: `${appUrl}/demo-checkout?${q}` } };
+  }
   const order = await paypalFetch<PayPalOrder>("/v2/checkout/orders", {
     method: "POST",
     headers: { "PayPal-Request-Id": `bharosa-${params.checkId}${params.payeeEmail ? "-p" : ""}` },
@@ -144,6 +163,9 @@ export async function createOrder(params: {
 }
 
 export async function captureOrder(orderId: string): Promise<Result<PayPalOrder>> {
+  if (paypalDemo() && orderId.startsWith("DEMO")) {
+    return { ok: true, data: { id: orderId, status: "COMPLETED", purchase_units: [{ payments: { captures: [{ id: `CAP${orderId.slice(4)}` }] } }] } as PayPalOrder };
+  }
   return paypalFetch<PayPalOrder>(`/v2/checkout/orders/${encodeURIComponent(orderId)}/capture`, {
     method: "POST",
     body: "{}",
