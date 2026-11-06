@@ -8,7 +8,16 @@ import f2 from "@/fixtures/02-subtle-scam.json";
 import f3 from "@/fixtures/03-safe-seller.json";
 import f4 from "@/fixtures/04-roman-urdu-scam.json";
 
-const SAMPLES = [f1, f2, f3, f4];
+const SAMPLES = [
+  f1,
+  f2,
+  f3,
+  f4,
+  { name: "Rental advance", short: "Room rent advance", input: { text: "Furnished room in F-10 Islamabad, only Rs 18,000 per month. I'm abroad so can't show it. Send 2 months advance on Easypaisa and I'll courier the keys. Many people asking, decide today." } },
+  { name: "Fake prize", short: "You won a prize", input: { text: "Congratulations! Your number won Rs 50,000 in the Jeeto Pakistan lucky draw. To claim, pay Rs 2,500 processing fee to JazzCash 0301-xxxxxxx within 1 hour or the prize goes to next winner." } },
+  { name: "Overpaying buyer", short: "Buyer overpays", input: { text: "Hello I want to buy your bike on OLX. I sent you Rs 95,000 instead of 85,000 by mistake, check your SMS. Please return the extra 10,000 to this number quickly, my mother is in hospital." } },
+  { name: "Fair laptop deal", short: "Used laptop, COD", input: { text: "Dell Latitude 7490, i5 8th gen, 16GB RAM, used 2 years, Rs 72,000. You can check it at my shop in Saddar Rawalpindi before paying, or I can send it cash on delivery through TCS." } },
+];
 
 const VERDICT_UI = {
   danger: { title: "Don't pay", box: "bg-danger-soft border-danger-line", text: "text-danger", dot: "bg-danger" },

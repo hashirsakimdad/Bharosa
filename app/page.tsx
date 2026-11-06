@@ -31,10 +31,7 @@ export default function Home() {
       {/* Hero */}
       <header className="mx-auto grid max-w-6xl items-center gap-12 px-4 pb-16 pt-8 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:pt-16">
         <div>
-          <p className="rise inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-600">
-            <span className="ping h-2 w-2 rounded-full bg-safe text-safe" aria-hidden /> Free scam check · English, Urdu, Roman Urdu
-          </p>
-          <h1 className="rise d1 mt-5 text-[2.6rem] font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
+          <h1 className="rise d1 text-[2.6rem] font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
             Check the seller <br className="hidden sm:block" />before the money goes.
           </h1>
           <p className="rise d2 mt-5 max-w-xl text-lg leading-relaxed text-stone-600 sm:text-xl">

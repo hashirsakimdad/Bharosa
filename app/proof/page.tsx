@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteNav from "@/components/site/SiteNav";
 import SiteFooter from "@/components/site/SiteFooter";
+import SampleCharts from "@/components/site/SampleCharts";
 import { getStats, recentLedger } from "@/lib/db";
 import { verifyLedger, type LedgerVerification } from "@/lib/ledger";
 import { listAnchors, type AnchorRow } from "@/lib/anchor";
@@ -69,8 +70,8 @@ export default async function ProofPage() {
 
       {!stats ? (
         <section className="mt-8 rounded-3xl border border-stone-200 bg-white p-5">
-          <p className="text-lg">The database isn&apos;t connected yet, so there&apos;s no live record to show.</p>
-          <p className="mt-2 text-stone-600">Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY and run supabase/setup.sql.</p>
+          <p className="text-lg">The live record isn&apos;t connected on this copy of the site yet.</p>
+          <p className="mt-2 text-stone-600">Once it is, the chain status, counts and latest records appear here. The charts below use sample data.</p>
         </section>
       ) : (
         <>
@@ -214,6 +215,8 @@ export default async function ProofPage() {
           )}
         </>
       )}
+
+      <SampleCharts />
 
       <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-5">
         <h2 className="text-2xl font-bold">How the verdict is made</h2>
