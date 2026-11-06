@@ -6,6 +6,7 @@
   color-scheme: light;
 }
 
+html { scroll-behavior: smooth; }
 html,
 body {
   background: #faf7f2;

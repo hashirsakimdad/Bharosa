@@ -33,7 +33,7 @@ async function compressImage(file: File): Promise<string> {
   return canvas.toDataURL("image/jpeg", 0.85);
 }
 
-export default function Checker() {
+export default function Checker({ embedded = false }: { embedded?: boolean }) {
   const [text, setText] = useState("");
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -52,7 +52,10 @@ export default function Checker() {
     else if (p === "success") setBanner("Payment done through PayPal. You're covered by buyer protection.");
     if (p === "cancelled") setBanner("Payment cancelled. No money was sent.");
     if (p === "failed") setBanner("Payment didn't go through. No money was sent.");
-    if (p) window.history.replaceState(null, "", "/");
+    if (p) {
+      window.history.replaceState(null, "", "/");
+      setTimeout(() => document.getElementById("check")?.scrollIntoView({ block: "start" }), 50);
+    }
   }, []);
 
   async function attach(file: File | undefined | null) {
@@ -104,14 +107,14 @@ export default function Checker() {
   const ui = result ? VERDICT_UI[result.verdict] : null;
 
   return (
-    <main className="mx-auto w-full max-w-xl px-4 pb-16 pt-8 sm:pt-14">
-      <header className="mb-7">
+    <div className={embedded ? "w-full" : "mx-auto w-full max-w-xl px-4 pb-16 pt-8 sm:pt-14"}>
+      {!embedded && <header className="mb-7">
         <p className="text-sm font-semibold tracking-wide text-stone-500">BHAROSA</p>
         <h1 className="mt-1 text-[2rem] font-bold leading-tight sm:text-4xl">Check before you pay.</h1>
         <p className="mt-2 text-lg text-stone-600">
           Paste the seller&apos;s message or drop a screenshot. You&apos;ll know in seconds if it&apos;s safe.
         </p>
-      </header>
+      </header>}
 
       {banner && (
         <div className="mb-5 rounded-2xl border border-stone-300 bg-white px-4 py-3 text-base" role="status">
@@ -282,13 +285,13 @@ export default function Checker() {
         </section>
       )}
 
-      <footer className="mt-10 text-center text-sm text-stone-500">
+      {!embedded && <footer className="mt-10 text-center text-sm text-stone-500">
         We never decide with AI alone: fixed rules pick the color, AI only reads and explains.
         <br />
         <a href="/proof" className="underline">
           Every check is chained and stamped on Bitcoin. See the proof.
         </a>
-      </footer>
-    </main>
+      </footer>}
+    </div>
   );
 }
