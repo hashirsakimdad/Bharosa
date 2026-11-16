@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 470" width="1200" height="470" role="img" aria-labelledby="t d">
+  <title id="t">How a Bharosa check works</title>
+  <desc id="d">The message goes through AI extraction with Gemini, then nine independent signals, then fixed rules pick the color. Green and yellow get a PayPal order, red never does. Every check is written to a hash chain that is stamped on Bitcoin daily.</desc>
+  <defs>
+    <style>.f{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}</style>
+    <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a8a29e"/></marker>
+  </defs>
+  <rect width="1200" height="470" rx="28" fill="#faf7f2"/>
+
+  <!-- lane labels -->
+  <rect x="48" y="40" width="472" height="44" rx="22" fill="#ffffff" stroke="#d6d3d1" stroke-width="2"/>
+  <text x="284" y="69" text-anchor="middle" class="f" font-size="20" font-weight="700" fill="#57534e">AI reads and explains</text>
+  <rect x="560" y="40" width="592" height="44" rx="22" fill="#1c1917"/>
+  <text x="856" y="69" text-anchor="middle" class="f" font-size="20" font-weight="700" fill="#ffffff">Fixed rules decide, every time the same</text>
+
+  <!-- steps -->
+  <g class="f">
+    <rect x="48" y="116" width="200" height="132" rx="20" fill="#ffffff" stroke="#e7e5e4" stroke-width="2"/>
+    <text x="72" y="154" font-size="24" font-weight="800" fill="#1c1917">Input</text>
+    <text x="72" y="186" font-size="18" fill="#57534e">text, link,</text>
+    <text x="72" y="210" font-size="18" fill="#57534e">screenshot,</text>
+    <text x="72" y="234" font-size="18" fill="#57534e">voice note</text>
+
+    <rect x="292" y="116" width="228" height="132" rx="20" fill="#ffffff" stroke="#e7e5e4" stroke-width="2"/>
+    <text x="316" y="154" font-size="24" font-weight="800" fill="#1c1917">Extract</text>
+    <text x="316" y="186" font-size="18" fill="#57534e">Gemini pulls price,</text>
+    <text x="316" y="210" font-size="18" fill="#57534e">payment, links,</text>
+    <text x="316" y="234" font-size="18" fill="#57534e">wallets, pressure</text>
+
+    <rect x="560" y="116" width="248" height="132" rx="20" fill="#ffffff" stroke="#e7e5e4" stroke-width="2"/>
+    <text x="584" y="154" font-size="24" font-weight="800" fill="#1c1917">9 signals</text>
+    <text x="584" y="186" font-size="18" fill="#57534e">price, wallet, brand,</text>
+    <text x="584" y="210" font-size="18" fill="#57534e">domain age, reports,</text>
+    <text x="584" y="234" font-size="18" fill="#57534e">advance, pressure…</text>
+
+    <rect x="852" y="116" width="300" height="132" rx="20" fill="#ffffff" stroke="#e7e5e4" stroke-width="2"/>
+    <text x="876" y="154" font-size="24" font-weight="800" fill="#1c1917">Verdict</text>
+    <circle cx="884" cy="186" r="8" fill="#b91c1c"/><text x="900" y="193" font-size="18" fill="#1c1917">any danger sign</text>
+    <circle cx="884" cy="212" r="8" fill="#b45309"/><text x="900" y="219" font-size="18" fill="#1c1917">2+ warnings</text>
+    <circle cx="884" cy="238" r="8" fill="#15803d"/><text x="900" y="245" font-size="18" fill="#1c1917">nothing wrong found</text>
+  </g>
+  <g stroke="#a8a29e" stroke-width="3" marker-end="url(#a)">
+    <line x1="252" y1="182" x2="284" y2="182"/><line x1="524" y1="182" x2="552" y2="182"/><line x1="812" y1="182" x2="844" y2="182"/>
+  </g>
+
+  <!-- outcomes -->
+  <path d="M1002 252 V292" stroke="#a8a29e" stroke-width="3" marker-end="url(#a)"/>
+  <g class="f">
+    <rect x="48" y="304" width="340" height="118" rx="20" fill="#fee2e2" stroke="#fca5a5" stroke-width="2"/>
+    <text x="72" y="344" font-size="22" font-weight="800" fill="#b91c1c">Red: no pay link, ever</text>
+    <text x="72" y="376" font-size="18" fill="#1c1917">Report the seller in one tap.</text>
+    <text x="72" y="402" font-size="18" fill="#1c1917">Reports feed the next check.</text>
+
+    <rect x="420" y="304" width="340" height="118" rx="20" fill="#dcfce7" stroke="#86efac" stroke-width="2"/>
+    <text x="444" y="344" font-size="22" font-weight="800" fill="#15803d">Green / yellow: PayPal</text>
+    <text x="444" y="376" font-size="18" fill="#1c1917">Orders v2 checkout to the seller,</text>
+    <text x="444" y="402" font-size="18" fill="#1c1917">with buyer protection.</text>
+
+    <rect x="792" y="304" width="360" height="118" rx="20" fill="#1c1917"/>
+    <text x="816" y="344" font-size="22" font-weight="800" fill="#ffffff">Every result is on record</text>
+    <text x="816" y="376" font-size="18" fill="#d6d3d1">sha256 hash chain, stamped</text>
+    <text x="816" y="402" font-size="18" fill="#d6d3d1">on Bitcoin daily. See /proof.</text>
+  </g>
+</svg>
