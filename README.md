@@ -22,6 +22,10 @@ People in Pakistan and the Gulf lose real money every day to sellers on WhatsApp
 
 ## See it work
 
+<p align="center">
+  <img src="./assets/readme/check-demo.gif" width="100%" alt="Animation: a crypto-only iPhone offer is checked, three warning signs appear and the verdict is Don't pay; then a fair headphones offer gets three green checks, Looks safe and a PayPal button">
+</p>
+
 <table>
   <tr>
     <td width="50%"><img src="./docs/gallery/2-scam-caught.png" alt="A chat screenshot gets a red Don't pay verdict listing crypto wallet, fake brand site and pressure tactics"></td>
@@ -70,6 +74,30 @@ Every check, report and payment is also written to a tamper-evident hash chain s
 | Pressure | | "only today", "5 people waiting", "jaldi karo" |
 | Account age | | seller account <30 days old |
 
+### How the color is picked
+
+The AI never gets a vote here. This is the whole decision, from [`lib/check/verdict.ts`](lib/check/verdict.ts):
+
+```mermaid
+flowchart TD
+    A([Seller's message, link,<br/>screenshot or voice note]) --> B[Gemini reads it<br/>+ rule-based extraction]
+    B --> C[9 independent signals<br/>each fails safe to unknown]
+    C --> D{Any danger sign?}
+    D -- yes --> R[🔴 Don't pay<br/>no pay link, report seller]
+    D -- no --> E{2 or more warnings?}
+    E -- yes --> Y[🟡 Be careful<br/>PayPal link offered]
+    E -- no --> F{Any real evidence found?}
+    F -- no --> Y
+    F -- yes --> G[🟢 Looks safe<br/>PayPal link offered]
+    R & Y & G --> L[(Hash-chain record)]
+    classDef red fill:#fee2e2,stroke:#b91c1c,color:#7f1d1d
+    classDef yel fill:#fef3c7,stroke:#b45309,color:#78350f
+    classDef grn fill:#dcfce7,stroke:#15803d,color:#14532d
+    class R red
+    class Y yel
+    class G grn
+```
+
 All rules live in `lib/check/`. The web page and WhatsApp (`lib/channels/whatsapp/`) both call the same `runCheck()`.
 
 All rules live in `lib/check/`. The web page and WhatsApp (`lib/channels/whatsapp/`) both call the same `runCheck()`.
@@ -93,11 +121,51 @@ All rules live in `lib/check/`. The web page and WhatsApp (`lib/channels/whatsap
 
 The AI never decides the verdict. Fixed rules in `lib/check/verdict.ts` pick red / yellow / green from the signals, so every result is repeatable and explainable.
 
+### The safe payment, step by step
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Buyer
+    participant B as Bharosa
+    participant P as PayPal
+    participant L as Hash chain
+    Buyer->>B: Check this seller
+    B-->>Buyer: 🟢 Looks safe + "Pay safely with PayPal"
+    Buyer->>B: Tap pay
+    B->>P: Orders v2: create order (exact price, seller as payee)
+    P-->>Buyer: PayPal checkout
+    Buyer->>P: Approve
+    P->>B: Redirect back with order id
+    B->>P: Capture order
+    B->>L: payment_captured
+    P--)B: Webhook: COMPLETED / REFUNDED / DISPUTE
+    B->>P: verify-webhook-signature
+    Note over B,L: A dispute counts as a scam report against that seller
+    B->>L: Record the outcome
+```
+
 **Other tools:** Next.js 14, TypeScript, Tailwind, Supabase (Postgres + RLS), Twilio WhatsApp API, OpenTimestamps (Bitcoin anchoring), RDAP (domain age), Google Safe Browsing (optional), Vercel (hosting + cron). No hackathon sponsor tools were used.
 
 
 
 **Built with AI assistance:** Claude (Anthropic) was used as a coding assistant during development. The explainer video narration and music were generated with ElevenLabs.
+
+## Tamper-proof record
+
+<p align="center">
+  <img src="./assets/readme/hash-chain.gif" width="100%" alt="Animation: four records (a check, a report, a check, a PayPal capture) link into a chain, the newest is stamped on Bitcoin, then editing one old record breaks the link after it">
+</p>
+
+```mermaid
+flowchart LR
+    V["/api/ledger/verify<br/>re-walks every link"] -. checks .-> E1
+    E1["#21 check"] --> E2["#22 report"] --> E3["#23 check"] --> E4["#24 payment"]
+    E4 -- "daily stamp" --> OTS[OpenTimestamps] --> BTC[(Bitcoin)]
+    style BTC fill:#ffc439,stroke:#b45309,color:#1c1917
+```
+
+Every record's hash includes the one before it, so one daily Bitcoin stamp covers the whole history. Anyone can re-run the check at `/api/ledger/verify` or on the public `/proof` page.
 
 ## Quick start
 
@@ -138,6 +206,28 @@ PayPal doesn't take PKR, AED, SAR or INR, so those prices are converted to USD u
 
 <details>
 <summary><b>WhatsApp (Twilio sandbox, free)</b></summary>
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Buyer
+    participant W as WhatsApp (Twilio)
+    participant B as /api/whatsapp
+    participant C as runCheck()
+    Buyer->>W: Forward message, screenshot or voice note
+    W->>B: Signed webhook
+    B->>B: Verify Twilio signature, rate limit
+    B->>C: Same check as the website
+    alt done within 15 s
+        C-->>B: Verdict
+        B-->>Buyer: 🔴🟡🟢 reply in the buyer's language
+    else slower
+        B-->>Buyer: "checking..."
+        C-->>B: Verdict
+        B-)Buyer: Follow-up message with the verdict
+    end
+    Buyer->>B: WHY / REPORT
+```
 
 People forward a seller's message, screenshot or voice note to a WhatsApp number and get the verdict back in the same chat, in their language.
 
