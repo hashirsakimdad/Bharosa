@@ -1,0 +1,5 @@
+flowchart LR
+    V["verify:<br/>re-walks<br/>every link"] -. checks .-> E1
+    E1["#21 check"] --> E2["#22 report"] --> E3["#23 check"] --> E4["#24 payment"]
+    E4 -- "daily stamp" --> OTS[OpenTimestamps] --> BTC[(Bitcoin)]
+    style BTC fill:#ffc439,stroke:#b45309,color:#1c1917

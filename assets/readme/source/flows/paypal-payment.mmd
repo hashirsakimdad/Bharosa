@@ -1,0 +1,19 @@
+sequenceDiagram
+    autonumber
+    participant Buyer
+    participant B as Bharosa
+    participant P as PayPal
+    participant L as Hash chain
+    Buyer->>B: Check this seller
+    B-->>Buyer: 🟢 Looks safe + "Pay safely with PayPal"
+    Buyer->>B: Tap pay
+    B->>P: Orders v2: create order (exact price, seller as payee)
+    P-->>Buyer: PayPal checkout
+    Buyer->>P: Approve
+    P->>B: Redirect back with order id
+    B->>P: Capture order
+    B->>L: payment_captured
+    P--)B: Webhook: COMPLETED / REFUNDED / DISPUTE
+    B->>P: verify-webhook-signature
+    Note over B,L: A dispute counts as a scam report against that seller
+    B->>L: Record the outcome

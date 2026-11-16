@@ -1,0 +1,19 @@
+sequenceDiagram
+    autonumber
+    participant Buyer
+    participant W as WhatsApp (Twilio)
+    participant B as /api/whatsapp
+    participant C as runCheck()
+    Buyer->>W: Forward message, screenshot or voice note
+    W->>B: Signed webhook
+    B->>B: Verify Twilio signature, rate limit
+    B->>C: Same check as the website
+    alt done within 15 s
+        C-->>B: Verdict
+        B-->>Buyer: 🔴🟡🟢 reply in the buyer's language
+    else slower
+        B-->>Buyer: "checking..."
+        C-->>B: Verdict
+        B-)Buyer: Follow-up message with the verdict
+    end
+    Buyer->>B: WHY / REPORT

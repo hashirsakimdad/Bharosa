@@ -1,10 +1,10 @@
 <!doctype html><html><head><meta charset="utf-8"><style>
-*{box-sizing:border-box}body{margin:0;width:1200px;height:400px;background:#1c1917;font-family:Inter,-apple-system,"Segoe UI",Roboto,sans-serif;color:#fff;overflow:hidden;position:relative}
-.t{position:absolute;left:64px;top:44px;font-size:34px;font-weight:800}.sub{position:absolute;left:64px;top:92px;font-size:20px;color:#a8a29e}
-.b{position:absolute;top:156px;width:190px;height:120px;border-radius:18px;background:#fff;color:#1c1917;padding:14px 16px}
+*{box-sizing:border-box}body{margin:0;width:1200px;height:400px;background:#faf7f2;font-family:Inter,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1c1917;overflow:hidden;position:relative}
+.t{position:absolute;left:64px;top:44px;font-size:34px;font-weight:800}.sub{position:absolute;left:64px;top:92px;font-size:20px;color:#57534e}
+.b{position:absolute;top:156px;width:190px;height:120px;border-radius:18px;background:#fff;color:#1c1917;padding:14px 16px;border:2px solid #e7e5e4}
 .k{font-size:15px;font-weight:700;color:#78716c}.n{font-size:22px;font-weight:800;margin-top:4px}.hh{font-family:ui-monospace,Menlo,monospace;font-size:14px;color:#57534e;margin-top:10px}
-.l{position:absolute;top:212px;height:6px;border-radius:3px;background:#86efac}
-.stamp{position:absolute;top:146px;width:170px;height:140px;border-radius:999px;border:4px dashed #ffc439;color:#ffc439;display:grid;place-items:center;text-align:center;font-weight:800;font-size:15px;line-height:1.25}
+.l{position:absolute;top:212px;height:6px;border-radius:3px;background:#15803d}
+.stamp{position:absolute;top:146px;width:170px;height:140px;border-radius:999px;border:4px dashed #b45309;background:#fef3c7;color:#78350f;display:grid;place-items:center;text-align:center;font-weight:800;font-size:15px;line-height:1.25}
 .res{position:absolute;left:64px;bottom:40px;font-size:22px;font-weight:700}
 </style></head><body>
 <div class="t">Every check is on record</div><div class="sub">Each record locks in the one before it. The newest link is stamped on Bitcoin.</div>
@@ -18,14 +18,14 @@ window.render=(t)=>{
  const fade=t>TOTAL-0.5?1-(t-(TOTAL-0.5))/0.5:1;
  const tamper=t>7.2, tt=ease((t-7.2)/0.4);
  B.forEach((b,i)=>{const a=ease((t-0.4-i*0.9)/0.5); if(a<=0)return; const x=64+i*230;
-  if(i>0){const la=ease((t-0.4-i*0.9-0.3)/0.4); const broke=tamper&&i===2; h+=`<div class=l style="left:${x-40}px;width:${40*la}px;opacity:${fade};background:${broke?`rgb(${134+(239-134)*tt},${239-(239-68)*tt},${172-(172-68)*tt})`:'#86efac'}"></div>`}
+  if(i>0){const la=ease((t-0.4-i*0.9-0.3)/0.4); const broke=tamper&&i===2; h+=`<div class=l style="left:${x-40}px;width:${40*la}px;opacity:${fade};background:${broke&&tt>.4?'#b91c1c':'#15803d'}"></div>`}
   const red=tamper&&i===1;
-  h+=`<div class=b style="left:${x}px;opacity:${a*fade};transform:translateY(${(1-a)*14}px);${red?`box-shadow:0 0 0 ${4*tt}px #ef4444`:''}"><div class=k>#${21+i} · ${b[0]}</div><div class=n style="color:${b[3]}">${red&&tt>.5?'Edited?':b[1]}</div><div class=hh>${b[2]}</div></div>`});
+  h+=`<div class=b style="left:${x}px;opacity:${a*fade};transform:translateY(${(1-a)*14}px);${red?`border-color:#b91c1c;box-shadow:0 0 0 ${3*tt}px #fca5a5`:''}"><div class=k>#${21+i} · ${b[0]}</div><div class=n style="color:${b[3]}">${red&&tt>.5?'Edited?':b[1]}</div><div class=hh>${b[2]}</div></div>`});
  const sa=ease((t-4.4)/0.6);
  if(sa>0) h+=`<div class=stamp style="left:${64+4*230-10}px;opacity:${sa*fade};transform:rotate(${(1-sa)*-25}deg) scale(${1.25-0.25*sa})">OpenTimestamps<br>stamped on<br>Bitcoin</div>`;
  let r="";
- if(t>5.4&&!tamper) r=`<span style="color:#86efac">● Chain intact. Anyone can verify it at /proof.</span>`;
- if(tamper) r=`<span style="color:#f87171">● Change one old record and verification fails at that link.</span>`;
+ if(t>5.4&&!tamper) r=`<span style="color:#15803d">● Chain intact. Anyone can verify it at /proof.</span>`;
+ if(tamper) r=`<span style="color:#b91c1c">● Change one old record and verification fails at that link.</span>`;
  if(r) h+=`<div class=res style="opacity:${Math.min(ease((t-(tamper?7.2:5.4))/0.5),fade)}">${r}</div>`;
  w.innerHTML=h;
 };

@@ -1,0 +1,14 @@
+flowchart LR
+    C([9 signals]) --> D{Any danger<br/>sign?}
+    D -- yes --> R[🔴 Don't pay<br/>no pay link]
+    D -- no --> E{2+<br/>warnings?}
+    E -- yes --> Y[🟡 Be careful<br/>PayPal link]
+    E -- no --> F{Any real<br/>evidence?}
+    F -- no --> Y
+    F -- yes --> G[🟢 Looks safe<br/>PayPal link]
+        classDef red fill:#fee2e2,stroke:#b91c1c,color:#7f1d1d
+    classDef yel fill:#fef3c7,stroke:#b45309,color:#78350f
+    classDef grn fill:#dcfce7,stroke:#15803d,color:#14532d
+    class R red
+    class Y yel
+    class G grn
